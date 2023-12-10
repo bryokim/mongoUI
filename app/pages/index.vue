@@ -13,7 +13,9 @@
 
       <v-sheet class="mx-auto" width="30%">
         <div class="mb-16">
-          <VBtnBlock color="success">Create new connection</VBtnBlock>
+          <NuxtLink to="/connect" class="text-decoration-none">
+            <VBtnBlock color="success">Create new connection</VBtnBlock>
+          </NuxtLink>
         </div>
         <div class="mb-16">
           <VBtnBlock color="primary-2">Load saved connection</VBtnBlock>
