@@ -65,6 +65,15 @@ export default {
 
           return "invalid uri format";
         },
+        (value) => {
+          if (
+            /^mongodb:\/\/.+$/.exec(value) ||
+            /^mongodb+srv:\/\/.+$/.exec(value)
+          )
+            return true;
+
+          return 'Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"';
+        },
       ],
       name: "",
       nameRules: [
