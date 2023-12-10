@@ -2,7 +2,7 @@ import "@mdi/font/css/materialdesignicons.css";
 
 import "vuetify/styles";
 import { createVuetify, type ThemeDefinition } from "vuetify";
-import { VBtn } from "vuetify/components";
+import { VBtn, VTextField } from "vuetify/components";
 
 const myCustomTheme: ThemeDefinition = {
   dark: false,
@@ -18,7 +18,7 @@ const myCustomTheme: ThemeDefinition = {
     warning: "#FFD686",
     danger: "#F5516E",
     "purple-1": "#7000FF",
-    "purple-2": "#91A8FD"
+    "purple-2": "#91A8FD",
   },
 };
 
@@ -31,16 +31,21 @@ export default defineNuxtPlugin((app) => {
       },
     },
     aliases: {
-        VBtnBlock: VBtn,
+      VBtnBlock: VBtn,
+      VTextFieldConnect: VTextField,
+    },
+    defaults: {
+      VBtnBlock: {
+        class: "button text-lowercase",
+        elevation: "10",
+        rounded: "lg",
+        block: true,
       },
-      defaults: {
-        VBtnBlock: {
-          class: "button text-lowercase",
-          elevation: "10",
-          rounded: "lg",
-          block: true,
-        },
+      VTextFieldConnect: {
+        variant: "underlined",
+        required: true,
       },
+    },
   });
   app.vueApp.use(vuetify);
 });
