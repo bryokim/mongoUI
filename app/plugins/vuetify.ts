@@ -2,6 +2,7 @@ import "@mdi/font/css/materialdesignicons.css";
 
 import "vuetify/styles";
 import { createVuetify, type ThemeDefinition } from "vuetify";
+import { VBtn } from "vuetify/components";
 
 const myCustomTheme: ThemeDefinition = {
   dark: false,
@@ -28,7 +29,18 @@ export default defineNuxtPlugin((app) => {
       themes: {
         myCustomTheme,
       },
-    }
+    },
+    aliases: {
+        VBtnBlock: VBtn,
+      },
+      defaults: {
+        VBtnBlock: {
+          class: "button text-lowercase",
+          elevation: "10",
+          rounded: "lg",
+          block: true,
+        },
+      },
   });
   app.vueApp.use(vuetify);
 });

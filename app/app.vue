@@ -5,6 +5,8 @@ import "@/assets/main.css";
 <template>
   <v-app>
     <NavBar></NavBar>
-    <v-main> </v-main>
+    <v-main>
+      <NuxtPage></NuxtPage>
+    </v-main>
   </v-app>
 </template>
