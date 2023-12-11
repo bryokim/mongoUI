@@ -106,7 +106,10 @@ export default {
         } catch (error) {
           if (error.data.message) this.error = error.data.message;
         }
+
         this.connectionLoading = false;
+
+        navigateTo("/home");
       }
     },
   },
