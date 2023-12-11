@@ -6,7 +6,12 @@
       </p>
     </div>
 
-    <v-form v-model="valid" validate-on="submit" fast-fail>
+    <v-form
+      v-model="valid"
+      validate-on="submit"
+      fast-fail
+      @submit.prevent="connect"
+    >
       <v-card color="#3578AF" rounded="lg" class="mb-16">
         <v-container>
           <v-text-field
@@ -47,6 +52,8 @@
 </template>
 
 <script>
+import { useConnect } from "@/composables/useConnect";
+
 export default {
   data() {
     return {
@@ -84,6 +91,24 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    async connect(values) {
+      const { valid } = await values;
+
+      if (valid) {
+        this.connectionLoading = true;
+
+        try {
+          const { connect } = useConnect();
+          await connect(this.name, this.uri);
+          this.error = "";
+        } catch (error) {
+          if (error.data.message) this.error = error.data.message;
+        }
+        this.connectionLoading = false;
+      }
+    },
   },
 };
 </script>
