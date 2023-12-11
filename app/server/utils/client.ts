@@ -98,7 +98,7 @@ class Client {
         this._client = new MongoClient(options.uri);
         await this._client?.connect();
       } catch (error: any) {
-        await this._client?.close();
+        await this.closeClient();
         this._client = undefined;
         throw new Error(error.message);
       }
@@ -112,19 +112,29 @@ class Client {
   }
 
   /**
-   * Closes the mongodb connection and set the class properties to undefined.
+   * Closes the mongodb connection.
    *
    * @async
    */
   async closeClient() {
     if (this._client) {
       await this._client.close();
-
-      this._client = undefined;
-      this._uri = undefined;
-      this._name = undefined;
-      this._user = undefined;
     }
+  }
+
+  /**
+   * Clears all information about current client and closes the mongodb
+   * connection.
+   *
+   * @async
+   */
+  async clearCurrentClient() {
+    await this.closeClient();
+
+    this._client = undefined;
+    this._uri = undefined;
+    this._name = undefined;
+    this._user = undefined;
   }
 }
 
