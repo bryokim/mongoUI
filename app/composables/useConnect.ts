@@ -13,7 +13,7 @@ export const useConnect = () => {
   };
 
   /**
-   * Calls the `api/connect` endpoint that creates a new mongodb connection
+   * Calls the `/api/connect` endpoint that creates a new mongodb connection
    * if none exists. Also sets the `useClient` value to the return value of
    * the connection call.
    *
@@ -31,7 +31,21 @@ export const useConnect = () => {
     if (data) setClient(data);
   };
 
+  /**
+   * Calls the `/api/disconnect` endpoint that disconnects the current mongodb
+   * connection.
+   * Sets the `useClient` value to null.
+   *
+   * @async
+   */
+  const disconnect = async () => {
+    await $fetch("/api/disconnect");
+
+    client.value = null;
+  };
+
   return {
     connect,
+    disconnect,
   };
 };
