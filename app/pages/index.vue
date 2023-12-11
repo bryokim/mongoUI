@@ -28,6 +28,16 @@
   </v-container>
 </template>
 
+<script>
+export default {
+  setup() {
+    definePageMeta({
+      middleware: ["disconnected"],
+    });
+  },
+};
+</script>
+
 <style>
 .name {
   color: #91fd94;
