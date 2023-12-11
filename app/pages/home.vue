@@ -10,6 +10,11 @@
 import { useClient } from "@/composables/useClient";
 
 export default {
+  setup() {
+    definePageMeta({
+      middleware: ["connected"],
+    });
+  },
   data() {
     return {
       client: useClient().value,
