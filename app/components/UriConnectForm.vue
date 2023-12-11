@@ -10,7 +10,7 @@
       v-model="valid"
       validate-on="submit"
       fast-fail
-      @submit.prevent="connect"
+      @submit.prevent="connectDb"
     >
       <v-card color="#3578AF" rounded="lg" class="mb-16">
         <v-container>
@@ -93,7 +93,7 @@ export default {
     };
   },
   methods: {
-    async connect(values) {
+    async connectDb(values) {
       const { valid } = await values;
 
       if (valid) {
@@ -103,13 +103,13 @@ export default {
           const { connect } = useConnect();
           await connect(this.name, this.uri);
           this.error = "";
+
+          navigateTo("/home");
         } catch (error) {
           if (error.data.message) this.error = error.data.message;
         }
 
         this.connectionLoading = false;
-
-        navigateTo("/home");
       }
     },
   },
