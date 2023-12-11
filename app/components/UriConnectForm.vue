@@ -6,7 +6,12 @@
       </p>
     </div>
 
-    <v-form v-model="valid" validate-on="submit" fast-fail>
+    <v-form
+      v-model="valid"
+      validate-on="submit"
+      fast-fail
+      @submit.prevent="connectDb"
+    >
       <v-card color="#3578AF" rounded="lg" class="mb-16">
         <v-container>
           <v-text-field
@@ -47,6 +52,8 @@
 </template>
 
 <script>
+import { useConnect } from "@/composables/useConnect";
+
 export default {
   data() {
     return {
@@ -65,6 +72,15 @@ export default {
 
           return "invalid uri format";
         },
+        (value) => {
+          if (
+            /^mongodb:\/\/.+$/.exec(value) ||
+            /^mongodb+srv:\/\/.+$/.exec(value)
+          )
+            return true;
+
+          return 'Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"';
+        },
       ],
       name: "",
       nameRules: [
@@ -75,6 +91,27 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    async connectDb(values) {
+      const { valid } = await values;
+
+      if (valid) {
+        this.connectionLoading = true;
+
+        try {
+          const { connect } = useConnect();
+          await connect(this.name, this.uri);
+          this.error = "";
+
+          navigateTo("/home");
+        } catch (error) {
+          if (error.data.message) this.error = error.data.message;
+        }
+
+        this.connectionLoading = false;
+      }
+    },
   },
 };
 </script>
