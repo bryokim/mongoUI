@@ -96,8 +96,10 @@ class Client {
     if (!this._client) {
       try {
         this._client = new MongoClient(options.uri);
-        this._client && (await this._client.connect());
+        await this._client?.connect();
       } catch (error: any) {
+        await this._client?.close();
+        this._client = undefined;
         throw new Error(error.message);
       }
 
