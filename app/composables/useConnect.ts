@@ -44,8 +44,15 @@ export const useConnect = () => {
     client.value = null;
   };
 
+  const getClient = async () => {
+    const data = (await $fetch("/api/client")) as client;
+
+    if (data) setClient(data);
+  };
+
   return {
     connect,
     disconnect,
+    getClient,
   };
 };
