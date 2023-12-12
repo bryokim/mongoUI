@@ -73,8 +73,8 @@
 </template>
 
 <script>
-import { useConnect } from "@/composables/useConnect";
-import { useValidate } from "@/composables/useValidate";
+import { useConnect } from "~/composables/useConnect";
+import { useValidate } from "~/composables/useValidate";
 
 export default {
   data() {
@@ -84,68 +84,50 @@ export default {
       error: "",
       name: "",
       nameRules: [
-        (value) => {
-          if (value) return true;
-
-          return "name is required";
-        },
         async (value) => {
-          const data = await useValidate().checkName(value);
+          const valid = await useValidate().validateName(value);
 
-          if (!data) return true;
-
-          return "name already assigned";
+          return valid;
         },
       ],
       scheme: "mongodb",
       schemeRules: [
         (value) => {
-          if (value) return true;
+          const valid = useValidate().validateScheme(value);
 
-          return "scheme is required";
-        },
-        (value) => {
-          if (/^mongodb$/.exec(value) || /^mongodb+srv$/.exec(value))
-            return true;
-
-          return 'Invalid scheme, expected scheme to be "mongodb" or "mongodb+srv"';
+          return valid;
         },
       ],
       host: "localhost",
       hostRules: [
         (value) => {
-          if (value) return true;
+          const valid = useValidate().validateHost(value);
 
-          return "host is required";
+          return valid;
         },
       ],
       port: 27017,
       portRules: [
         (value) => {
-          if (value) return true;
+          const valid = useValidate().validatePort(value);
 
-          return "port is required";
-        },
-        (value) => {
-          if (parseInt(value)) return true;
-
-          return "port must be a number";
+          return valid;
         },
       ],
       user: "",
       userRules: [
         (value) => {
-          if (value) return true;
+          const valid = useValidate().validateUser(value);
 
-          return "user is required";
+          return valid;
         },
       ],
       password: "",
       passwordRules: [
         (value) => {
-          if (value) return true;
+          const valid = useValidate().validatePassword(value);
 
-          return "password is required";
+          return valid;
         },
       ],
     };

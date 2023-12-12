@@ -52,7 +52,8 @@
 </template>
 
 <script>
-import { useConnect } from "@/composables/useConnect";
+import { useConnect } from "~/composables/useConnect";
+import { useValidate } from "~/composables/useValidate";
 
 export default {
   data() {
@@ -63,38 +64,17 @@ export default {
       uri: "",
       uriRules: [
         (value) => {
-          if (value) return true;
+          const valid = useValidate().validateUri(value);
 
-          return "uri is required";
-        },
-        (value) => {
-          if (/^.+:\/\/.+:.+@.+:\d+.*$/.exec(value)) return true;
-
-          return "invalid uri format";
-        },
-        (value) => {
-          if (
-            /^mongodb:\/\/.+$/.exec(value) ||
-            /^mongodb+srv:\/\/.+$/.exec(value)
-          )
-            return true;
-
-          return 'Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"';
+          return valid;
         },
       ],
       name: "",
       nameRules: [
-        (value) => {
-          if (value) return true;
-
-          return "name is required";
-        },
         async (value) => {
-          const data = await useValidate().checkName(value);
+          const valid = await useValidate().validateName(value);
 
-          if (!data) return true;
-
-          return "name already assigned";
+          return valid;
         },
       ],
     };
