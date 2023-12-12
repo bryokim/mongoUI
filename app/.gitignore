@@ -1,3 +1,7 @@
+# Storage files
+.test_data
+.data
+
 # Nuxt dev/build outputs
 .output
 .data
