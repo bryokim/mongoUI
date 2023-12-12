@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
       name: body.name,
     });
   } catch (error: any) {
-    return createError({ statusCode: 400, message: error.message });
+    throw createError({ statusCode: 400, message: error.message });
   }
 
   const client = clientInstance.client;
@@ -28,13 +28,18 @@ export default defineEventHandler(async (event) => {
 
     const dbs = await client.db().admin().listDatabases();
 
-    return {
+    const clientInfo = {
       uri: clientInstance.uri,
       name: clientInstance.name,
       userInfo: { user: clientInstance.user, roles },
       databases: dbs.databases.map((db) => db.name),
     } as client;
+
+    clientInfo.name &&
+      (await useStorage("db").setItem(clientInfo.name, clientInfo));
+
+    return clientInfo;
   }
 
-  return createError({ statusCode: 500, message: "Server error" });
+  throw createError({ statusCode: 500, message: "Server error" });
 });
