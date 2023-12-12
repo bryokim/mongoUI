@@ -95,7 +95,11 @@ class Client {
 
     if (!this._client) {
       try {
-        this._client = new MongoClient(options.uri);
+        this._client = new MongoClient(options.uri, {
+          connectTimeoutMS: 5000,
+          serverSelectionTimeoutMS: 5000,
+        });
+
         await this._client?.connect();
       } catch (error: any) {
         await this.closeClient();
