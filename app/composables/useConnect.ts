@@ -1,10 +1,10 @@
-import { useClient, type client } from "./useClient";
+import { useClientInfo, type client } from "./useClientInfo";
 
 export const useConnect = () => {
-  const client = useClient();
+  const client = useClientInfo();
 
   /**
-   * Sets the value for `useClient` to the new client.
+   * Sets the value for `useClientInfo` to the new client.
    *
    * @param {client} newClient new client.
    */
@@ -14,7 +14,7 @@ export const useConnect = () => {
 
   /**
    * Calls the `/api/connect` endpoint that creates a new mongodb connection
-   * if none exists. Also sets the `useClient` value to the return value of
+   * if none exists. Also sets the `useClientInfo` value to the return value of
    * the connection call.
    *
    * @async
@@ -34,7 +34,7 @@ export const useConnect = () => {
   /**
    * Calls the `/api/disconnect` endpoint that disconnects the current mongodb
    * connection.
-   * Sets the `useClient` value to null.
+   * Sets the `useClientInfo` value to null.
    *
    * @async
    */
@@ -45,8 +45,8 @@ export const useConnect = () => {
   };
 
   /**
-   * Gets the current connected client if any and sets the useClient value.
-   * 
+   * Gets the current connected client if any and sets the `useClientInfo` value.
+   *
    * @async
    */
   const getClient = async () => {

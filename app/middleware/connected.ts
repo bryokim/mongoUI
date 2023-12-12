@@ -6,7 +6,7 @@
  */
 
 export default defineNuxtRouteMiddleware(async () => {
-  const user = useClient();
+  const user = useClientInfo();
 
   if (!user.value) return navigateTo({ name: "index" });
 });

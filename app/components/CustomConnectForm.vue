@@ -75,6 +75,7 @@
 <script>
 import { useConnect } from "@/composables/useConnect";
 import { useValidate } from "@/composables/useValidate";
+
 export default {
   data() {
     return {

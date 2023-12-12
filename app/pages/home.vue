@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { useClient } from "@/composables/useClient";
+import { useClientInfo } from "@/composables/useClientInfo";
 
 export default {
   setup() {
@@ -17,12 +17,12 @@ export default {
   },
   data() {
     return {
-      client: useClient().value,
+      client: useClientInfo().value,
     };
   },
   methods: {
     check() {
-      console.log(useClient().value);
+      console.log(useClientInfo().value);
     },
   },
 };

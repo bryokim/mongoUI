@@ -17,12 +17,12 @@ export interface client {
  * Holds the current client as its value.
  *
  * @example
- * import { useClient } from '@/composables/useClient';
+ * import { useClientInfo } from '@/composables/useClient';
  *
- * const client = useClient().value
+ * const client = useClientInfo().value
  *
  * console.log(client);
  */
-export const useClient = () => {
+export const useClientInfo = () => {
   return useState<client | null>("client", () => null);
 };

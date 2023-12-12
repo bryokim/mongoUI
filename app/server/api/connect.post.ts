@@ -1,5 +1,5 @@
 import clientInstance from "../utils/client";
-import { type client } from "@/composables/useClient";
+import { type client } from "~/composables/useClientInfo";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{

@@ -4,7 +4,7 @@
     <v-spacer></v-spacer>
 
     <div class="me-4">
-      <div v-if="!useClient().value">MongoDB version X.X.X</div>
+      <div v-if="!useClientInfo().value">MongoDB version X.X.X</div>
       <div v-else>
         <VBtnBlock color="danger" @click="disconnect"
           >Close connection</VBtnBlock
@@ -16,7 +16,7 @@
 
 <script>
 import { useConnect } from "@/composables/useConnect";
-import { useClient } from "@/composables/useClient";
+import { useClientInfo } from "@/composables/useClientInfo";
 
 export default {
   methods: {

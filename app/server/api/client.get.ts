@@ -1,5 +1,5 @@
 import clientInstance from "~/server/utils/client";
-import { client } from "~/composables/useClient";
+import { client } from "~/composables/useClientInfo";
 
 /**
  * Restores clientInfo if there is an existing open connection.
