@@ -1,24 +1,16 @@
 import clientInstance from "~/server/utils/client";
 import { client } from "~/composables/useClient";
 
+/**
+ * Restores clientInfo if there is an existing open connection.
+ */
+
 export default defineEventHandler(async (event) => {
-  const client = clientInstance.client;
+  const name = clientInstance.name;
 
-  if (client) {
-    const roles = (
-      await client
-        .db()
-        .admin()
-        .command({ usersInfo: { user: clientInstance.user, db: "admin" } })
-    ).users[0].roles;
+  if (name) {
+    const clientInfo = await useStorage("db").getItem(name);
 
-    const dbs = await client.db().admin().listDatabases();
-  
-    return {
-      uri: clientInstance.uri,
-      name: clientInstance.name,
-      userInfo: { user: clientInstance.user, roles },
-      databases: dbs.databases.map((db) => db.name),
-    } as client;
+    return clientInfo as client;
   }
 });
