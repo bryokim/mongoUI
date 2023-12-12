@@ -1,4 +1,4 @@
-import clientInstance from "../utils/client";
+import clientInstance from "~/server/utils/client";
 import { type client } from "~/composables/useClientInfo";
 
 export default defineEventHandler(async (event) => {

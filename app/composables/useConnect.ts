@@ -23,7 +23,7 @@ export const useConnect = () => {
    * @param uri mongodb connection uri.
    */
   const connect = async (name: string, uri: string) => {
-    const data = (await $fetch("/api/connect", {
+    const data = (await $fetch("/api/client/connect", {
       method: "POST",
       body: { name, uri },
     })) as client;
@@ -39,7 +39,7 @@ export const useConnect = () => {
    * @async
    */
   const disconnect = async () => {
-    await $fetch("/api/disconnect");
+    await $fetch("/api/client/disconnect");
 
     client.value = null;
   };
