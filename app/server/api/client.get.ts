@@ -11,6 +11,9 @@ export default defineEventHandler(async (event) => {
   if (name) {
     const clientInfo = await useStorage("db").getItem(name);
 
+    // Close and reset client if the file is not found or is empty.
+    if (!clientInfo) clientInstance.clearCurrentClient();
+
     return clientInfo as client;
   }
 });
