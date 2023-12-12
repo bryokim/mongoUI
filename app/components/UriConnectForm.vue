@@ -89,6 +89,13 @@ export default {
 
           return "name is required";
         },
+        async (value) => {
+          const data = await useValidate().checkName(value);
+
+          if (!data) return true;
+
+          return "name already assigned";
+        },
       ],
     };
   },

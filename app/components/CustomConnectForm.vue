@@ -74,7 +74,7 @@
 
 <script>
 import { useConnect } from "@/composables/useConnect";
-
+import { useValidate } from "@/composables/useValidate";
 export default {
   data() {
     return {
@@ -87,6 +87,13 @@ export default {
           if (value) return true;
 
           return "name is required";
+        },
+        async (value) => {
+          const data = await useValidate().checkName(value);
+
+          if (!data) return true;
+
+          return "name already assigned";
         },
       ],
       scheme: "mongodb",
