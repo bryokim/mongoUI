@@ -18,7 +18,9 @@
           </NuxtLink>
         </div>
         <div class="mb-16">
-          <VBtnBlock color="primary-2">Load saved connection</VBtnBlock>
+          <NuxtLink to="/load" class="text-decoration-none">
+            <VBtnBlock color="primary-2">Load saved connection</VBtnBlock>
+          </NuxtLink>
         </div>
         <div class="mb-16">
           <VBtnBlock color="purple-2">Settings</VBtnBlock>
