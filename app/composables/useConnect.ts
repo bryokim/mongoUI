@@ -44,6 +44,11 @@ export const useConnect = () => {
     client.value = null;
   };
 
+  /**
+   * Gets the current connected client if any and sets the useClient value.
+   * 
+   * @async
+   */
   const getClient = async () => {
     const data = (await $fetch("/api/client")) as client;
 
