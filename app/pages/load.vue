@@ -2,27 +2,23 @@
   <v-container>
     <h1
       class="text-center mb-10 text-decoration-underline"
-      style="font-family: Poppins; font-weight: 500"
+      style="font-family: Poppins; font-weight: 400"
     >
       Saved connections
     </h1>
     <v-data-table :items="items" :headers="headers">
       <template v-slot:item.actions="{ item }">
+
         <ConnectFromSave :item="item"></ConnectFromSave>
 
         <v-tooltip location="top" text="edit">
           <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" size="small" class="me-5">
-              mdi-pencil
-            </v-icon>
+            <v-icon v-bind="props" size="small"> mdi-pencil </v-icon>
           </template>
         </v-tooltip>
 
-        <v-tooltip location="top" text="delete">
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" size="small"> mdi-delete </v-icon>
-          </template>
-        </v-tooltip>
+        <DeleteSaved :item="item" @deleted="loadFiles"></DeleteSaved>
+
       </template>
 
       <template v-slot:no-data>
@@ -54,7 +50,7 @@ export default {
         { title: "User", key: "user" },
         { title: "Host", key: "host" },
         { title: "Port", key: "port" },
-        { title: "Actions", key: "actions", sortable: false },
+        { title: "Actions", key: "actions", align: "center", sortable: false },
       ],
     };
   },
