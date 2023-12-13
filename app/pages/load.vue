@@ -8,17 +8,11 @@
     </h1>
     <v-data-table :items="items" :headers="headers">
       <template v-slot:item.actions="{ item }">
-
         <ConnectFromSave :item="item"></ConnectFromSave>
 
-        <v-tooltip location="top" text="edit">
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" size="small"> mdi-pencil </v-icon>
-          </template>
-        </v-tooltip>
+        <EditSaved :item="item" @updated="loadFiles"></EditSaved>
 
         <DeleteSaved :item="item" @deleted="loadFiles"></DeleteSaved>
-
       </template>
 
       <template v-slot:no-data>
