@@ -102,15 +102,31 @@ export const useValidate = () => {
   };
 
   /**
-   * Validates that the password is not empty.
+   * Validates that the password is not empty and if user is reconnecting,
+   * they enter the correct password.
+   * 
+   * @async
    *
-   * @param port password for the user that is connecting.
+   * @param password password for the user that is connecting.
+   * @param name the name of the connection. It is optional. Use only if
+   * you are checking if password matches stored one.
    *
    * @returns true if the password is valid, else an error message is returned.
    */
-  const validatePassword = (password: string) => {
+  const validatePassword = async (password: string, name: string = "") => {
     if (!password) return "password is required";
 
+    if (name) {
+      const isCorrect = await $fetch("/validate/password", {
+        method: "POST",
+        body: {
+          name,
+          enteredPassword: password,
+        },
+      });
+
+      if (!isCorrect) return "invalid password";
+    }
     return true;
   };
 

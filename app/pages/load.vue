@@ -8,13 +8,7 @@
     </h1>
     <v-data-table :items="items" :headers="headers">
       <template v-slot:item.actions="{ item }">
-        <v-tooltip location="top" text="connect">
-          <template v-slot:activator="{ props }">
-            <v-icon v-bind="props" size="small" class="me-5">
-              mdi-connection
-            </v-icon>
-          </template>
-        </v-tooltip>
+        <ConnectFromSave :item="item"></ConnectFromSave>
 
         <v-tooltip location="top" text="edit">
           <template v-slot:activator="{ props }">
