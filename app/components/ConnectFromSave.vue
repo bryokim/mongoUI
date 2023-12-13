@@ -4,23 +4,16 @@
       <v-btn v-bind="props" variant="plain">
         <v-tooltip activator="parent" location="top" text="connect">
         </v-tooltip>
-        <v-icon size="small"> mdi-connection </v-icon>
+        <v-icon size="small" color="success"> mdi-connection </v-icon>
       </v-btn>
     </template>
 
-    <v-card rounded="lg">
+    <v-card rounded="lg" theme="dark">
       <v-card-text>
-        <div class="text-center mb-5">
-          <v-row>
-            <v-col cols="10"> Please enter your password </v-col>
-            <v-col
-              ><v-icon @click="close" size="large">mdi-close</v-icon></v-col
-            >
-          </v-row>
-        </div>
+        <div class="text-center mb-5">Please enter your password</div>
 
         <div>
-          <p v-if="error" class="mb-3 text-center bg-danger rounded">
+          <p v-if="error" class="mb-3 text-center text-danger rounded">
             {{ error }}
           </p>
         </div>
@@ -60,9 +53,17 @@
             @click:append="show = !show"
           ></v-text-field>
 
-          <VBtnBlock color="primary" type="submit" class="mt-5"
-            >Connect</VBtnBlock
-          >
+          <v-card-actions>
+            <v-spacer></v-spacer>
+
+            <v-btn text="cancel" @click="close"></v-btn>
+            <v-btn
+              text="connect"
+              color="success"
+              type="submit"
+              :disabled="!password"
+            ></v-btn>
+          </v-card-actions>
         </v-form>
       </v-card-text>
     </v-card>
@@ -101,6 +102,7 @@ export default {
       }
     },
     close() {
+      this.password = "";
       this.dialog = false;
     },
   },
