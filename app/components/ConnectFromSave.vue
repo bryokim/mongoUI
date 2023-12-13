@@ -13,7 +13,9 @@
         <div class="text-center mb-5">
           <v-row>
             <v-col cols="10"> Please enter your password </v-col>
-            <v-col><v-icon @click="close" size="large">mdi-close</v-icon></v-col>
+            <v-col
+              ><v-icon @click="close" size="large">mdi-close</v-icon></v-col
+            >
           </v-row>
         </div>
 
@@ -26,6 +28,7 @@
         <v-form
           v-model="valid"
           validate-on="submit"
+          @submit.prevent="connectDb"
           fast-fail
         >
           <v-text-field
@@ -83,6 +86,20 @@ export default {
   },
   props: ["item"],
   methods: {
+    async connectDb(values) {
+      const { valid } = await values;
+
+      if (valid) {
+        try {
+          const { reconnect } = useConnect();
+          await reconnect(this.item.name, this.password);
+          this.error = "";
+          navigateTo("/home");
+        } catch (error) {
+          if (error.data.message) this.error = error.data.message;
+        }
+      }
+    },
     close() {
       this.dialog = false;
     },

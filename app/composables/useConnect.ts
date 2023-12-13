@@ -55,9 +55,30 @@ export const useConnect = () => {
     if (data) setClient(data);
   };
 
+  /**
+   * Reconnects to a saved connection.
+   *
+   * @async
+   *
+   * @param name the name of the connection to reconnect to.
+   * @param password the password as entered by user.
+   */
+  const reconnect = async (name: string, password: string) => {
+    const data = await $fetch("/api/client/reconnect", {
+      method: "POST",
+      body: {
+        name,
+        password,
+      },
+    });
+
+    if (data) setClient(data);
+  };
+
   return {
     connect,
     disconnect,
     getClient,
+    reconnect,
   };
 };
