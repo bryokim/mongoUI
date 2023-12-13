@@ -1,5 +1,5 @@
 import { type client } from "~/composables/useClientInfo";
-import { parseUri } from "../utils/parse";
+import { parseUri } from "~/server/utils/parse";
 
 /**
  * Gets saved connections to be displayed on the load page.

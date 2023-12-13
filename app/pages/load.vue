@@ -50,7 +50,7 @@ export default {
   },
   methods: {
     async loadFiles() {
-      const data = await $fetch("/api/saved");
+      const data = await $fetch("/api/client/saved");
 
       this.items = data;
     },
