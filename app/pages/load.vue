@@ -1,34 +1,48 @@
 <template>
   <v-container>
-    <h1 class="text-center text-h5 font-weight-medium mb-3">
-      Available connections
+    <h1
+      class="text-center mb-10 text-decoration-underline"
+      style="font-family: Poppins; font-weight: 500"
+    >
+      Saved connections
     </h1>
-    <v-row>
-      <v-col :cols="cols" v-for="item in items" :key="item.name">
-        <v-card
-          class="mx-auto ma-5"
-          max-width="250"
-          :elevation="10"
-          rounded="lg"
-        >
-          <v-card-title class="text-center">{{ item.name }}</v-card-title>
+    <v-data-table :items="items" :headers="headers">
+      <template v-slot:item.actions="{ item }">
+        <v-tooltip location="top" text="connect">
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" size="small" class="me-5">
+              mdi-connection
+            </v-icon>
+          </template>
+        </v-tooltip>
 
-          <v-divider color="secondary"></v-divider>
+        <v-tooltip location="top" text="edit">
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" size="small" class="me-5">
+              mdi-pencil
+            </v-icon>
+          </template>
+        </v-tooltip>
 
-          <v-card-text>
-            <div class="my-4"><span color="#000000">host</span>: {{ item.host }}</div>
+        <v-tooltip location="top" text="delete">
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props" size="small"> mdi-delete </v-icon>
+          </template>
+        </v-tooltip>
+      </template>
 
-            <div class="my-4">port: {{ item.port }}</div>
+      <template v-slot:no-data>
+        <h4 class="my-10">You do not have any saved connections</h4>
 
-            <div class="my-4">user: {{ item.user }}</div>
-          </v-card-text>
-
-          <v-card-actions>
-            <VBtnBlock color="primary"> Connect </VBtnBlock>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
+        <v-sheet width="300" class="mx-auto">
+          <NuxtLink to="/connect" class="text-decoration-none">
+            <VBtnBlock color="success" class="mb-10"
+              >Create new connection</VBtnBlock
+            >
+          </NuxtLink>
+        </v-sheet>
+      </template>
+    </v-data-table>
   </v-container>
 </template>
 
@@ -36,8 +50,18 @@
 export default {
   data() {
     return {
-      cols: 4,
       items: [],
+      headers: [
+        {
+          title: "Name",
+          align: "start",
+          key: "name",
+        },
+        { title: "User", key: "user" },
+        { title: "Host", key: "host" },
+        { title: "Port", key: "port" },
+        { title: "Actions", key: "actions", sortable: false },
+      ],
     };
   },
   methods: {
@@ -45,9 +69,6 @@ export default {
       const data = await $fetch("/api/saved");
 
       this.items = data;
-
-      if (data.length === 1) this.cols = 12;
-      else if (data.length === 2) this.cols = 6;
     },
   },
   async mounted() {
