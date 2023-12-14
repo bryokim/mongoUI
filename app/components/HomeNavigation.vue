@@ -11,13 +11,14 @@
 
     <v-divider></v-divider>
 
-    <v-list nav density="compact">
+    <v-list nav density="compact" v-model:opened="open">
       <v-list-group v-for="(db, j) in dbsAndCols" :key="j" :value="db.name">
         <template v-slot:activator="{ props }">
           <v-list-item
             v-bind="props"
             prepend-icon="mdi-database-outline"
             :title="db.name"
+            @click="openDb(db.name)"
           ></v-list-item>
         </template>
         <v-list-item
@@ -42,10 +43,12 @@ export default {
   data() {
     return {
       drawer: true,
+      open: [this.$route.params.slug[0]],
       dbsAndCols: useDbsInfo().value,
       counter: useState("counter", () => 0),
     };
   },
+  emits: ["openedDatabase"],
   methods: {
     async getDbsAndCols() {
       if (this.counter % 10 === 0) {
@@ -56,6 +59,9 @@ export default {
 
       this.counter++;
       this.dbsAndCols = useDbsInfo().value;
+    },
+    openDb(value) {
+      this.$emit("openedDatabase", value);
     },
   },
   async mounted() {
