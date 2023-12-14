@@ -4,6 +4,7 @@ export type parsedUri = {
   password?: string;
   host?: string;
   port?: number;
+  params?: { key: string; value: string }[];
   error?: string;
 };
 
@@ -16,7 +17,7 @@ export type parsedUri = {
  */
 
 export const parseUri = (uri: string): parsedUri => {
-  const re = /^(.+):\/\/(.+):(.+)@([^:?/]+)(:\d+)?.*$/;
+  const re = /^(.+):\/\/(.+):(.+)@([^:?/]+)(:\d+)?([/?]+)?(.*)$/;
 
   const output = re.exec(uri);
 
@@ -27,6 +28,13 @@ export const parseUri = (uri: string): parsedUri => {
       password: output[3],
       host: output[4],
       port: parseInt(output[5]?.slice(1)),
+      params: output[7]
+        ?.split("&")
+        .map((param) => {
+          const [key, value] = param.split("=", 2);
+          return { key, value };
+        })
+        .filter((param) => param.key),
     };
   } else {
     return {
