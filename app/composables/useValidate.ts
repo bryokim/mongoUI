@@ -35,9 +35,9 @@ export const useValidate = () => {
   const validateUri = (uri: string) => {
     if (!uri) return "uri is required";
 
-    if (!/^.+:\/\/.+:.+@.+:\d+.*$/.exec(uri)) return "invalid uri format";
+    if (!/^(.+):\/\/(.+):(.+)@([^:?/]+)(:\d+)?.*$/.exec(uri)) return "invalid uri format";
 
-    if (!/^mongodb:\/\/.+$/.exec(uri) && !/^mongodb+srv:\/\/.+$/.exec(uri))
+    if (!/^mongodb:\/\/.+$/.exec(uri) && !/^mongodb\+srv:\/\/.+$/.exec(uri))
       return 'Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"';
 
     return true;
@@ -104,7 +104,7 @@ export const useValidate = () => {
   /**
    * Validates that the password is not empty and if user is reconnecting,
    * they enter the correct password.
-   * 
+   *
    * @async
    *
    * @param password password for the user that is connecting.
