@@ -1,5 +1,7 @@
 <template>
   <v-layout class="mt-1">
+    <DatabaseNavigation></DatabaseNavigation>
+
     <v-main style="height: calc(100vh - 80px)">
       <v-container>
         <pre v-if="$route.params.slug">
