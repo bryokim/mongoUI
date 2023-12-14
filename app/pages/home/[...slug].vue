@@ -1,6 +1,8 @@
 <template>
   <v-layout class="mt-1">
-    <HomeNavigation></HomeNavigation>
+    <HomeNavigation
+      @opened-database="(db) => selectedDatabase(db)"
+    ></HomeNavigation>
 
     <v-main style="height: calc(100vh - 80px)">
       <v-row class="mx-10">
@@ -23,23 +25,20 @@
           </v-breadcrumbs>
         </v-col>
 
-        <v-col cols="9">
-          <v-card v-if="!database && !collection">
+        <v-col cols="12" v-if="database && !collection">
+          <DatabaseView :database="database"></DatabaseView>
+        </v-col>
+
+        <v-col cols="12" v-if="!database && !collection">
+          <v-card>
             <pre> No database selected </pre>
           </v-card>
-          <v-card v-if="database && !collection"> Here </v-card>
-          <v-card v-if="database && collection"> Collection </v-card>
+        </v-col>
+
+        <v-col cols="12" v-if="database && collection">
+          <v-card> {{ collection }} </v-card>
         </v-col>
       </v-row>
-
-      <v-container>
-        <pre v-if="$route.params.slug">
-          {
-            database: {{ database }}
-            collection: {{ collection }}
-          }
-        </pre>
-      </v-container>
     </v-main>
   </v-layout>
 </template>
@@ -56,6 +55,12 @@ export default {
       database: this.$route.params.slug[0],
       collection: this.$route.params.slug[1],
     };
+  },
+  methods: {
+    selectedDatabase(database) {
+      this.database = database;
+      this.$router.push(`/home/${database}`);
+    },
   },
 };
 </script>
