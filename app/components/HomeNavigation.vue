@@ -1,9 +1,10 @@
 <template>
-  <v-navigation-drawer app permanent v-model="drawer">
+  <v-navigation-drawer app expand-on-hover rail v-model="drawer">
     <template v-slot:prepend>
       <v-list-item
         title="Databases"
         class="text-center"
+        prepend-icon="mdi-database"
         style="font-family: Poppins, sans-serif; font-weight: 500"
       >
       </v-list-item>
@@ -18,6 +19,7 @@
             v-bind="props"
             prepend-icon="mdi-database-outline"
             :title="db.name"
+            color="primary"
             @click="openDb(db.name)"
           ></v-list-item>
         </template>
