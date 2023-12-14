@@ -12,23 +12,19 @@
     <v-divider></v-divider>
 
     <v-list nav density="compact">
-      <v-list-group
-        v-for="(db, j) in dbsAndCols"
-        :key="j"
-        :value="db.database"
-      >
+      <v-list-group v-for="(db, j) in dbsAndCols" :key="j" :value="db.name">
         <template v-slot:activator="{ props }">
           <v-list-item
             v-bind="props"
             prepend-icon="mdi-database-outline"
-            :title="db.database"
+            :title="db.name"
           ></v-list-item>
         </template>
         <v-list-item
           v-for="(col, i) in db.collections"
           :key="i"
           :title="col"
-          :to="'/home/' + `${db.database}/${col}`"
+          :to="'/home/' + `${db.name}/${col}`"
         ></v-list-item>
       </v-list-group>
     </v-list>
@@ -46,16 +42,20 @@ export default {
   data() {
     return {
       drawer: true,
-      dbsAndCols: [],
+      dbsAndCols: useDbsInfo().value,
+      counter: useState("counter", () => 0),
     };
   },
   methods: {
     async getDbsAndCols() {
-      const dbsAndCols = await $fetch("/api/db/collections", {
-        query: { name: useClientInfo().value.name },
-      });
+      if (this.counter % 10 === 0) {
+        const { getDbsInfo } = useDb();
 
-      this.dbsAndCols = dbsAndCols;
+        await getDbsInfo();
+      }
+
+      this.counter++;
+      this.dbsAndCols = useDbsInfo().value;
     },
   },
   async mounted() {
