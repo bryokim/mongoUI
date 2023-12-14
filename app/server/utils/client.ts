@@ -1,9 +1,15 @@
 import { MongoClient } from "mongodb";
 import { parseUri } from "./parse";
+import { DatabaseInfo } from "~/composables/useDbsInfo";
 
 interface connectionOptions {
   uri: string;
   name: string;
+}
+
+interface Role {
+  role: string;
+  db: string;
 }
 
 let instance: Client | null = null;
@@ -139,6 +145,84 @@ class Client {
     this._uri = undefined;
     this._name = undefined;
     this._user = undefined;
+  }
+
+  /**
+   * Gets all databases on the client that the user has access to.
+   *
+   * @async
+   *
+   * @returns list of all databases.
+   */
+  async databases() {
+    if (this._client) {
+      return (await this._client?.db().admin().listDatabases())?.databases.map(
+        (db) => db.name
+      );
+    }
+    return [];
+  }
+
+  /**
+   * Gets the roles that a user has in a certain database.
+   *
+   * @see Role
+   * @async
+   *
+   * @param database name of the database.
+   *
+   * @returns list of roles that the user has.
+   */
+  async userRoles(database: string) {
+    if (this._client) {
+      const roles: Role[] = (
+        await this._client
+          .db()
+          .admin()
+          .command({ usersInfo: { user: this._user, db: "admin" } })
+      ).users[0].roles;
+
+      return roles
+        .filter((role) => role.db === database)
+        .map((role) => role.role);
+    }
+
+    return [];
+  }
+
+  /**
+   * Gets database in the client and the collections found in the
+   * databases. The user's roles in every database are also retrieved.
+   *
+   * @see DatabaseInfo
+   *
+   * @returns A list of objects of type `DatabaseInfo`.
+   */
+  async dbsInfo() {
+    const databases = await this.databases();
+
+    const dbsAndCols: Array<DatabaseInfo> = [];
+
+    if (databases && this._client) {
+      for (let database of databases) {
+        const collectionObjects = await this._client
+          .db(database)
+          .listCollections()
+          .toArray();
+
+        const collections = collectionObjects.map((col) => col.name);
+
+        const roles = await this.userRoles(database);
+
+        dbsAndCols.push({
+          name: database,
+          collections,
+          roles,
+        });
+      }
+    }
+
+    return dbsAndCols;
   }
 }
 
