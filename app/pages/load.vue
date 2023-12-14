@@ -32,6 +32,11 @@
 
 <script>
 export default {
+  setup() {
+    definePageMeta({
+      middleware: ["disconnected"],
+    });
+  },
   data() {
     return {
       items: [],
