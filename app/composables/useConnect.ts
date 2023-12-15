@@ -2,6 +2,7 @@ import { useClientInfo, type client } from "./useClientInfo";
 
 export const useConnect = () => {
   const client = useClientInfo();
+  const { getDbsInfo, setDbsInfo } = useDb();
 
   /**
    * Sets the value for `useClientInfo` to the new client.
@@ -29,6 +30,9 @@ export const useConnect = () => {
     })) as client;
 
     if (data) setClient(data);
+
+    // Load this client's database info into `useDbsInfo`
+    await getDbsInfo();
   };
 
   /**
@@ -42,6 +46,9 @@ export const useConnect = () => {
     await $fetch("/api/client/disconnect");
 
     client.value = null;
+
+    // Restore `useDbsInfo` value to {}
+    setDbsInfo({});
   };
 
   /**
@@ -73,6 +80,9 @@ export const useConnect = () => {
     });
 
     if (data) setClient(data);
+
+    // Load this client's database info into `useDbsInfo`
+    await getDbsInfo();
   };
 
   return {
