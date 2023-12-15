@@ -35,7 +35,7 @@ export const useDb = () => {
    */
   const getRolesInfo = async () => {
     const rolesInfo = await $fetch("/api/db/roles");
-  
+
     setRolesInfo(rolesInfo);
   };
 
@@ -60,11 +60,33 @@ export const useDb = () => {
     setDbsInfo({ nonEmpty: useDbsInfo().value?.nonEmpty, empty: data });
   };
 
+  /**
+   * Sends request to drop a database.
+   *
+   * @async
+   *
+   * @param database name of the database to drop.
+   */
+  const dropDb = async (database: string) => {
+    const dropped = await $fetch("/api/db/drop", {
+      method: "POST",
+      body: { database },
+    });
+
+    if (dropped.detail == "ok") {
+      // Reload `useDbsInfo` with the new databases.
+      await getDbsInfo();
+    } else {
+      throw Error("Error occurred while dropping the database");
+    }
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
     getDbsInfo,
     getRolesInfo,
     createDb,
+    dropDb,
   };
 };

@@ -45,17 +45,43 @@
     <v-spacer></v-spacer>
 
     <v-col cols="4">
-      <v-card rounded="lg" class="mb-14">
+      <v-card rounded="lg" class="mb-14" v-if="canDropDatabase">
         <v-card-subtitle> Database Actions </v-card-subtitle>
         <v-card-text>
           <div>
-            <VBtnBlock
-              class="mb-6"
-              color="#F5516E"
-              prepend-icon="mdi-delete-alert"
-              >Drop Database</VBtnBlock
-            >
+            <p v-if="error" class="mb-3 text-center text-danger rounded">
+              {{ error }}
+            </p>
           </div>
+          <v-dialog
+            v-model="dialog"
+            max-width="500px"
+            transition="dialog-top-transition"
+          >
+            <template v-slot:activator="{ props }">
+              <VBtnBlock
+                v-bind="props"
+                class="mb-6"
+                color="#F5516E"
+                prepend-icon="mdi-delete-alert"
+                >Drop Database</VBtnBlock
+              >
+            </template>
+
+            <v-card rounded="lg" theme="dark">
+              <v-card-text>
+                <v-icon size="large" color="danger" class="me-2">
+                  mdi-delete-alert
+                </v-icon>
+                Are you sure you want to drop {{ database }}?
+              </v-card-text>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn text="cancel" @click="closeDialog"></v-btn>
+                <v-btn text="drop" color="danger" @click="dropDatabase"></v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
         </v-card-text>
       </v-card>
 
@@ -146,6 +172,8 @@ export default {
     return {
       clientInfo: useClientInfo().value,
       valid: false,
+      dialog: false,
+      error: "",
       newDatabase: {
         database: this.database,
         collection: "",
@@ -191,6 +219,12 @@ export default {
         useRolesInfo().value.superuser || useRolesInfo().value.createDatabase
       );
     },
+    canDropDatabase() {
+      return (
+        useRolesInfo().value.superuser ||
+        useRolesInfo().value.dropDatabases?.includes(this.database)
+      );
+    },
   },
   methods: {
     validDatabase() {
@@ -216,6 +250,26 @@ export default {
         // navigate to the new database.
         this.$router.push(`/home/${database}`);
       }
+    },
+    async dropDatabase() {
+      const { dropDb } = useDb();
+
+      try {
+        await dropDb(this.database);
+
+        // navigate to /home after dropping database.
+        this.$router.push("/home");
+
+        this.error = "";
+      } catch (error) {
+        console.log(error);
+        this.error = error.data.message;
+      }
+
+      this.closeDialog();
+    },
+    closeDialog() {
+      this.dialog = false;
     },
   },
 };

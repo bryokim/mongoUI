@@ -211,7 +211,7 @@ class Client {
   /**
    * Gets database in the client and the collections found in the
    * databases. The user's roles in every database are also retrieved.
-   * 
+   *
    * `local` and `config` databases are left out.
    *
    * @see DatabaseInfo
@@ -264,6 +264,30 @@ class Client {
     if (!this.emptyDatabases?.some((db) => db.name === database)) {
       this.emptyDatabases?.push({ name: database, collections: [collection] });
     }
+  }
+
+  /**
+   * Drops a database.
+   * 
+   * @async
+   *
+   * @param database name of the database to drop.
+   *
+   * @returns `true` if the database is dropped successfully else `false`.
+   */
+  async dropDatabase(database: string) {
+    if (this.emptyDatabases?.some((db) => db.name === database)) {
+      this.emptyDatabases = this.emptyDatabases?.filter(
+        (db) => db.name !== database
+      );
+    } else {
+      try {
+        await this._client?.db(database).dropDatabase();
+      } catch (error) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 
