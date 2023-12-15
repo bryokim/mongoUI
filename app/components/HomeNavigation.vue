@@ -81,14 +81,20 @@
     </div>
 
     <template v-slot:append>
-      <v-dialog v-model="dialog" max-width="400px">
+      <v-dialog
+        v-model="dialog"
+        max-width="400px"
+        :disabled="!canCreateDatabase"
+      >
         <template v-slot:activator="{ props }">
           <v-list-item
             prepend-icon="mdi-database-plus"
             class="mb-5"
             v-bind="props"
           >
-            <VBtnBlock color="primary">New Database</VBtnBlock>
+            <VBtnBlock color="primary" :disabled="!canCreateDatabase"
+              >New Database</VBtnBlock
+            >
           </v-list-item>
         </template>
 
@@ -130,6 +136,11 @@
 
 <script>
 export default {
+  setup() {
+    return {
+      rolesInfo: useRolesInfo().value,
+    };
+  },
   data() {
     return {
       valid: false,
@@ -153,6 +164,14 @@ export default {
         },
       },
     };
+  },
+  computed: {
+    canCreateDatabase() {
+      return (
+        useRolesInfo().value.superuser ||
+        useRolesInfo().value.createDatabase
+      );
+    },
   },
   emits: ["openedDatabase"],
   methods: {

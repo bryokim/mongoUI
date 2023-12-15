@@ -1,4 +1,5 @@
 import type { AllDatabaseInfo, DatabaseInfo } from "./useDbsInfo";
+import type { AssignedRolesOnDbs } from "./useRolesInfo";
 
 /**
  * Implements functions for dealing with databases after connecting.
@@ -6,9 +7,14 @@ import type { AllDatabaseInfo, DatabaseInfo } from "./useDbsInfo";
 
 export const useDb = () => {
   const databasesInfo = useDbsInfo();
+  const rolesInfo = useRolesInfo();
 
   const setDbsInfo = (newValue: AllDatabaseInfo) => {
     databasesInfo.value = newValue;
+  };
+
+  const setRolesInfo = (newValue: AssignedRolesOnDbs) => {
+    rolesInfo.value = newValue;
   };
 
   /**
@@ -22,13 +28,23 @@ export const useDb = () => {
     setDbsInfo(dbsAndCols);
   };
 
+  /**
+   * Gets roles info and sets the value for `useRolesInfo`.
+   *
+   * @async
+   */
+  const getRolesInfo = async () => {
+    const rolesInfo = await $fetch("/api/db/roles");
+  
+    setRolesInfo(rolesInfo);
+  };
 
   /**
    * Creates a new empty database.
-   * 
+   *
    * The database is implied and is only added to the mongodb
    * when the first document is inserted.
-   * 
+   *
    * @param database name of the new database.
    * @param collection name of the new collection.
    */
@@ -45,7 +61,10 @@ export const useDb = () => {
   };
 
   return {
+    setDbsInfo,
+    setRolesInfo,
     getDbsInfo,
+    getRolesInfo,
     createDb,
   };
 };

@@ -2,7 +2,7 @@ import { useClientInfo, type client } from "./useClientInfo";
 
 export const useConnect = () => {
   const client = useClientInfo();
-  const { getDbsInfo, setDbsInfo } = useDb();
+  const { getDbsInfo, setDbsInfo, setRolesInfo } = useDb();
 
   /**
    * Sets the value for `useClientInfo` to the new client.
@@ -47,8 +47,9 @@ export const useConnect = () => {
 
     client.value = null;
 
-    // Restore `useDbsInfo` value to {}
+    // Restore `useDbsInfo` and `useRolesInfo` to default.
     setDbsInfo({});
+    setRolesInfo({ superuser: false });
   };
 
   /**

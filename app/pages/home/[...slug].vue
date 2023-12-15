@@ -62,5 +62,8 @@ export default {
       this.$router.push(`/home/${database}`);
     },
   },
+  async mounted() {
+    await useDb().getRolesInfo();
+  },
 };
 </script>
