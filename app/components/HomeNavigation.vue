@@ -32,7 +32,11 @@
         inset
       ></v-list-subheader>
 
-      <v-list-group v-for="(db, j) in nonEmpty" :key="j" :value="db.name">
+      <v-list-group
+        v-for="(db, j) in useDbsInfo().value?.nonEmpty"
+        :key="j"
+        :value="db.name"
+      >
         <template v-slot:activator="{ props }">
           <v-list-item
             v-bind="props"
@@ -51,7 +55,7 @@
       </v-list-group>
     </v-list>
 
-    <div v-if="empty">
+    <div v-if="useDbsInfo().value?.empty">
       <v-divider color="white"></v-divider>
       <v-list nav density="compact" v-model:opened="open">
         <v-list-subheader
@@ -60,7 +64,11 @@
           inset
         ></v-list-subheader>
 
-        <v-list-group v-for="(db, j) in empty" :key="j" :value="db.name">
+        <v-list-group
+          v-for="(db, j) in useDbsInfo().value?.empty"
+          :key="j"
+          :value="db.name"
+        >
           <template v-slot:activator="{ props }">
             <v-list-item
               v-bind="props"
@@ -148,8 +156,6 @@ export default {
       drawer: true,
       rail: false,
       open: [this.$route.params.slug[0]],
-      nonEmpty: useDbsInfo().value?.nonEmpty,
-      empty: useDbsInfo().value?.empty,
       counter: useState("counter", () => 0),
       newDatabase: {
         database: "",
@@ -168,8 +174,7 @@ export default {
   computed: {
     canCreateDatabase() {
       return (
-        useRolesInfo().value.superuser ||
-        useRolesInfo().value.createDatabase
+        useRolesInfo().value.superuser || useRolesInfo().value.createDatabase
       );
     },
   },
@@ -183,8 +188,6 @@ export default {
       }
 
       this.counter++;
-      this.nonEmpty = useDbsInfo().value?.nonEmpty;
-      this.empty = useDbsInfo().value?.empty;
     },
     openDb(value) {
       this.$emit("openedDatabase", value);
@@ -207,9 +210,6 @@ export default {
         const { database, collection } = this.newDatabase;
 
         await createDb(database, collection);
-
-        // Update the empty databases with new values.
-        this.empty = useDbsInfo().value.empty;
 
         this.closeDialog();
 
