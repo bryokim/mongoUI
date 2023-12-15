@@ -1,5 +1,13 @@
 <template>
   <v-row v-if="validDatabase()">
+    <v-col cols="12" v-if="empty" class="mb-0">
+      <v-card color="warning" rounded="lg" class="py-0 mb-0"
+        ><v-card-text class="pa-1 ms-4">
+          <v-icon color="black">mdi-alert-circle</v-icon>
+          {{ database }} is empty and will be lost after closing connection
+        </v-card-text>
+      </v-card>
+    </v-col>
     <v-col cols="6">
       <v-card
         elevation="10"
@@ -144,6 +152,11 @@ export default {
         useDbsInfo().value?.empty.filter(
           (dbInfo) => dbInfo.name === this.database
         )[0]?.roles
+      );
+    },
+    empty() {
+      return useDbsInfo().value?.empty.some(
+        (dbInfo) => dbInfo.name === this.database
       );
     },
   },
