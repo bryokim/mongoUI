@@ -172,16 +172,14 @@ class Client {
   }
 
   /**
-   * Gets the roles that a user has in a certain database.
+   * Gets the roles that the user has.
    *
    * @see Role
    * @async
    *
-   * @param database name of the database.
-   *
    * @returns list of roles that the user has.
    */
-  async userRoles(database: string) {
+  async userRoles() {
     if (this._client) {
       const roles: Role[] = (
         await this._client
@@ -190,12 +188,24 @@ class Client {
           .command({ usersInfo: { user: this._user, db: "admin" } })
       ).users[0].roles;
 
-      return roles
-        .filter((role) => role.db === database)
-        .map((role) => role.role);
+      return roles;
     }
 
     return [];
+  }
+
+  /**
+   * Gets the roles the user has in a certain database.
+   *
+   * @param database name of the database.
+   * @param roles array of all the roles the user has.
+   *
+   * @returns roles the user has in database given.
+   */
+  getUserRolesInDb(database: string, roles: Role[]) {
+    return roles
+      .filter((role) => role.db === database)
+      .map((role) => role.role);
   }
 
   /**
@@ -212,6 +222,8 @@ class Client {
     const dbsAndCols: AllDatabaseInfo = { nonEmpty: [], empty: [] };
 
     if (databases && this._client) {
+      const allRoles = await this.userRoles();
+
       for (let database of databases) {
         const collectionObjects = await this._client
           .db(database)
@@ -220,7 +232,7 @@ class Client {
 
         const collections = collectionObjects.map((col) => col.name);
 
-        const roles = await this.userRoles(database);
+        const roles = this.getUserRolesInDb(database, allRoles);
 
         dbsAndCols.nonEmpty?.push({
           name: database,
@@ -237,10 +249,10 @@ class Client {
 
   /**
    * Adds a new database to the emptyDatabases array.
-   * 
+   *
    * The database is not created on the mongodb until the first
    * document is added.
-   * 
+   *
    * @param database name of the new database.
    * @param collection name of new collection.
    */
