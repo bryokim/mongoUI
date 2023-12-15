@@ -1,5 +1,11 @@
 <template>
-  <v-navigation-drawer app expand-on-hover rail v-model="drawer">
+  <v-navigation-drawer
+    app
+    permanent
+    v-model="drawer"
+    :rail="rail"
+    @click="rail = false"
+  >
     <template v-slot:prepend>
       <v-list-item
         title="Databases"
@@ -7,6 +13,13 @@
         prepend-icon="mdi-database"
         style="font-family: Poppins, sans-serif; font-weight: 500"
       >
+        <template v-slot:append>
+          <v-btn
+            variant="text"
+            icon="mdi-chevron-left"
+            @click.stop="rail = !rail"
+          ></v-btn>
+        </template>
       </v-list-item>
     </template>
 
@@ -122,6 +135,7 @@ export default {
       valid: false,
       dialog: false,
       drawer: true,
+      rail: false,
       open: [this.$route.params.slug[0]],
       nonEmpty: useDbsInfo().value?.nonEmpty,
       empty: useDbsInfo().value?.empty,
