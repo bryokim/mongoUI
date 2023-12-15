@@ -61,6 +61,7 @@
               text="connect"
               color="success"
               type="submit"
+              :loading="loading"
               :disabled="!password"
             ></v-btn>
           </v-card-actions>
@@ -76,6 +77,7 @@ export default {
     return {
       dialog: false,
       valid: false,
+      loading: false,
       error: "",
       password: "",
       show: false,
@@ -90,7 +92,8 @@ export default {
     async connectDb(values) {
       const { valid } = await values;
 
-      if (valid) {
+      if (valid && !this.loading) {
+        this.loading = true;
         try {
           const { reconnect } = useConnect();
           await reconnect(this.item.name, this.password);
@@ -99,6 +102,7 @@ export default {
         } catch (error) {
           if (error.data.message) this.error = error.data.message;
         }
+        this.loading = false;
       }
     },
     close() {
