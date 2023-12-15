@@ -211,6 +211,8 @@ class Client {
   /**
    * Gets database in the client and the collections found in the
    * databases. The user's roles in every database are also retrieved.
+   * 
+   * `local` and `config` databases are left out.
    *
    * @see DatabaseInfo
    *
@@ -225,20 +227,22 @@ class Client {
       const allRoles = await this.userRoles();
 
       for (let database of databases) {
-        const collectionObjects = await this._client
-          .db(database)
-          .listCollections()
-          .toArray();
+        if (database !== "local" && database !== "config") {
+          const collectionObjects = await this._client
+            .db(database)
+            .listCollections()
+            .toArray();
 
-        const collections = collectionObjects.map((col) => col.name);
+          const collections = collectionObjects.map((col) => col.name);
 
-        const roles = this.getUserRolesInDb(database, allRoles);
+          const roles = this.getUserRolesInDb(database, allRoles);
 
-        dbsAndCols.nonEmpty?.push({
-          name: database,
-          collections,
-          roles,
-        });
+          dbsAndCols.nonEmpty?.push({
+            name: database,
+            collections,
+            roles,
+          });
+        }
       }
     }
 
