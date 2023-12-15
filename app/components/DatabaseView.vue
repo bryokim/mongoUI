@@ -67,7 +67,7 @@
           </template>
         </v-list-item>
 
-        <v-list-item title="roles" :subtitle="roles.toString() || 'None'">
+        <v-list-item title="roles" :subtitle="roles?.toString() || 'None'">
           <template v-slot:prepend>
             <v-icon color="white">mdi-file-edit</v-icon>
           </template>
@@ -121,26 +121,41 @@ export default {
   props: ["database"],
   data() {
     return {
-      dbsInfo: useDbsInfo().value,
+      dbsInfo: useDbsInfo().value?.nonEmpty,
       clientInfo: useClientInfo().value,
     };
   },
   computed: {
     collections() {
-      return useDbsInfo().value?.filter(
-        (dbInfo) => dbInfo.name === this.database
-      )[0].collections;
+      return (
+        useDbsInfo().value?.nonEmpty.filter(
+          (dbInfo) => dbInfo.name === this.database
+        )[0]?.collections ||
+        useDbsInfo().value?.empty.filter(
+          (dbInfo) => dbInfo.name === this.database
+        )[0]?.collections
+      );
     },
     roles() {
-      return useDbsInfo().value?.filter(
-        (dbInfo) => dbInfo.name === this.database
-      )[0].roles;
+      return (
+        useDbsInfo().value?.nonEmpty.filter(
+          (dbInfo) => dbInfo.name === this.database
+        )[0]?.roles ||
+        useDbsInfo().value?.empty.filter(
+          (dbInfo) => dbInfo.name === this.database
+        )[0]?.roles
+      );
     },
   },
   methods: {
     validDatabase() {
-      return useDbsInfo().value?.some(
-        (dbInfo) => dbInfo.name === this.database
+      return (
+        useDbsInfo().value?.nonEmpty.some(
+          (dbInfo) => dbInfo.name === this.database
+        ) ||
+        useDbsInfo().value?.empty.some(
+          (dbInfo) => dbInfo.name === this.database
+        )
       );
     },
   },

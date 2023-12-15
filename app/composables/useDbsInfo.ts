@@ -1,7 +1,12 @@
 export interface DatabaseInfo {
   name: string;
   collections: Array<string>;
-  roles: Array<string>;
+  roles?: Array<string>;
+}
+
+export interface AllDatabaseInfo {
+  nonEmpty?: DatabaseInfo[];
+  empty?: DatabaseInfo[];
 }
 
 /**
@@ -17,5 +22,5 @@ export interface DatabaseInfo {
  * console.log(databasesInfo);
  */
 export const useDbsInfo = () => {
-  return useState<DatabaseInfo[] | null>("databases", () => null);
+  return useState<AllDatabaseInfo | null>("databases", () => null);
 };

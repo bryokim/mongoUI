@@ -1,6 +1,6 @@
 import { MongoClient } from "mongodb";
 import { parseUri } from "./parse";
-import { DatabaseInfo } from "~/composables/useDbsInfo";
+import { AllDatabaseInfo, DatabaseInfo } from "~/composables/useDbsInfo";
 
 interface connectionOptions {
   uri: string;
@@ -37,6 +37,12 @@ class Client {
    * @property instance of MongoClient created using given uri.
    */
   _client?: MongoClient;
+
+  /**
+   * @property new databases that are empty and are yet to be created
+   * in the mongodb.
+   */
+  emptyDatabases?: DatabaseInfo[];
 
   /**
    * Creates a new Client instance.
@@ -116,6 +122,7 @@ class Client {
       this._name = options.name;
       this._uri = options.uri;
       this._user = parseUri(options.uri).user;
+      this.emptyDatabases = [];
     } else {
       console.log("Client already assigned");
     }
@@ -145,6 +152,7 @@ class Client {
     this._uri = undefined;
     this._name = undefined;
     this._user = undefined;
+    this.emptyDatabases = undefined;
   }
 
   /**
@@ -201,7 +209,7 @@ class Client {
   async dbsInfo() {
     const databases = await this.databases();
 
-    const dbsAndCols: Array<DatabaseInfo> = [];
+    const dbsAndCols: AllDatabaseInfo = { nonEmpty: [], empty: [] };
 
     if (databases && this._client) {
       for (let database of databases) {
@@ -214,7 +222,7 @@ class Client {
 
         const roles = await this.userRoles(database);
 
-        dbsAndCols.push({
+        dbsAndCols.nonEmpty?.push({
           name: database,
           collections,
           roles,
@@ -222,7 +230,24 @@ class Client {
       }
     }
 
+    dbsAndCols.empty = this.emptyDatabases;
+
     return dbsAndCols;
+  }
+
+  /**
+   * Adds a new database to the emptyDatabases array.
+   * 
+   * The database is not created on the mongodb until the first
+   * document is added.
+   * 
+   * @param database name of the new database.
+   * @param collection name of new collection.
+   */
+  addDatabase(database: string, collection: string) {
+    if (!this.emptyDatabases?.some((db) => db.name === database)) {
+      this.emptyDatabases?.push({ name: database, collections: [collection] });
+    }
   }
 }
 

@@ -35,7 +35,8 @@ export const useValidate = () => {
   const validateUri = (uri: string) => {
     if (!uri) return "uri is required";
 
-    if (!/^(.+):\/\/(.+):(.+)@([^:?/]+)(:\d+)?.*$/.exec(uri)) return "invalid uri format";
+    if (!/^(.+):\/\/(.+):(.+)@([^:?/]+)(:\d+)?.*$/.exec(uri))
+      return "invalid uri format";
 
     if (!/^mongodb:\/\/.+$/.exec(uri) && !/^mongodb\+srv:\/\/.+$/.exec(uri))
       return 'Invalid scheme, expected connection string to start with "mongodb://" or "mongodb+srv://"';
@@ -130,6 +131,32 @@ export const useValidate = () => {
     return true;
   };
 
+  /**
+   * Validates that the database being added does not exist.
+   *
+   * @async
+   *
+   * @param database name of the new database.
+   *
+   * @returns true if the database is valid, else an error message is returned.
+   */
+  const validateDatabase = async (database: string) => {
+    if (!database) return "database is required";
+
+    let found: boolean | undefined = await $fetch("/validate/database", {
+      method: "POST",
+      body: { database: database.trim() },
+    });
+
+    if (!found) {
+      found = useDbsInfo().value?.empty?.some((db) => db.name === database);
+    }
+
+    if (found) return "database already assigned";
+
+    return true;
+  };
+
   return {
     validateName,
     validateUri,
@@ -138,5 +165,6 @@ export const useValidate = () => {
     validatePort,
     validateUser,
     validatePassword,
+    validateDatabase,
   };
 };
