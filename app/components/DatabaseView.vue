@@ -93,28 +93,43 @@
 
   <div v-else>
     <v-alert
-      max-width="400px"
       type="warning"
-      title="Database missing"
       :text="`${database} not found`"
       rounded="lg"
       class="mx-auto mb-16"
     ></v-alert>
 
-    <v-card max-width="400px" rounded="lg" elevation="4" class="mx-auto">
+    <v-card
+      theme="dark"
+      max-width="400px"
+      rounded="lg"
+      elevation="4"
+      class="mx-auto"
+      v-if="canCreateDatabase"
+    >
       <v-card-subtitle class="mt-4">create {{ database }}</v-card-subtitle>
       <v-card-text>
-        <v-form>
+        <v-form v-model="valid" @submit.prevent="createDatabase" fast-fail>
           <v-text-field
             variant="underlined"
+            v-model="newDatabase.database"
             label="Database"
-            :model-value="database"
-          >
-          </v-text-field>
-          <v-text-field variant="underlined" label="Collection"> </v-text-field>
+            :rules="[rules.dbIsValid]"
+          ></v-text-field>
+          <v-text-field
+            variant="underlined"
+            v-model="newDatabase.collection"
+            label="Collection"
+            :rules="[rules.required]"
+          ></v-text-field>
 
           <v-card-actions>
-            <VBtnBlock color="primary" variant="elevated" class="my-3">
+            <VBtnBlock
+              color="primary"
+              variant="elevated"
+              class="my-3"
+              type="submit"
+            >
               create {{ database }}
             </VBtnBlock>
           </v-card-actions>
@@ -129,8 +144,20 @@ export default {
   props: ["database"],
   data() {
     return {
-      dbsInfo: useDbsInfo().value?.nonEmpty,
       clientInfo: useClientInfo().value,
+      valid: false,
+      newDatabase: {
+        database: this.database,
+        collection: "",
+      },
+      rules: {
+        required: (value) => value !== "" || "required",
+        dbIsValid: async (value) => {
+          const isValid = await useValidate().validateDatabase(value);
+
+          return isValid;
+        },
+      },
     };
   },
   computed: {
@@ -159,6 +186,11 @@ export default {
         (dbInfo) => dbInfo.name === this.database
       );
     },
+    canCreateDatabase() {
+      return (
+        useRolesInfo().value.superuser || useRolesInfo().value.createDatabase
+      );
+    },
   },
   methods: {
     validDatabase() {
@@ -170,6 +202,20 @@ export default {
           (dbInfo) => dbInfo.name === this.database
         )
       );
+    },
+    async createDatabase(values) {
+      const { valid } = await values;
+
+      if (valid) {
+        const { createDb } = useDb();
+
+        const { database, collection } = this.newDatabase;
+
+        await createDb(database, collection);
+
+        // navigate to the new database.
+        this.$router.push(`/home/${database}`);
+      }
     },
   },
 };
