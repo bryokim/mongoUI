@@ -81,6 +81,28 @@ export const useDb = () => {
     }
   };
 
+  /**
+   * Sends request to create a new collection.
+   *
+   * @async
+   *
+   * @param database name of the database to add the collection into.
+   * @param collection name of the new collection.
+   */
+  const createCollection = async (database: string, collection: string) => {
+    const created = await $fetch("/api/collection/create", {
+      method: "POST",
+      body: { database, collection },
+    });
+
+    if (created.detail == "ok") {
+      // Reload `useDbsInfo` with the new collections.
+      await getDbsInfo();
+    } else {
+      throw Error("Error occurred while creating the collection");
+    }
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
@@ -88,5 +110,6 @@ export const useDb = () => {
     getRolesInfo,
     createDb,
     dropDb,
+    createCollection,
   };
 };

@@ -172,6 +172,27 @@ class Client {
   }
 
   /**
+   * Gets all collections in a database.
+   *
+   * @async
+   *
+   * @param database name of the database.
+   *
+   * @returns list of all collections in the database.
+   */
+  async collections(database: string) {
+    if (this._client) {
+      const collectionObjects = await this._client
+        .db(database)
+        .listCollections()
+        .toArray();
+
+      return collectionObjects.map((col) => col.name);
+    }
+    return [];
+  }
+
+  /**
    * Gets the roles that the user has.
    *
    * @see Role
@@ -228,12 +249,7 @@ class Client {
 
       for (let database of databases) {
         if (database !== "local" && database !== "config") {
-          const collectionObjects = await this._client
-            .db(database)
-            .listCollections()
-            .toArray();
-
-          const collections = collectionObjects.map((col) => col.name);
+          const collections = await this.collections(database);
 
           const roles = this.getUserRolesInDb(database, allRoles);
 
@@ -268,7 +284,7 @@ class Client {
 
   /**
    * Drops a database.
-   * 
+   *
    * @async
    *
    * @param database name of the database to drop.
@@ -283,6 +299,41 @@ class Client {
     } else {
       try {
         await this._client?.db(database).dropDatabase();
+      } catch (error) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Creates a collection in the given database.
+   *
+   * @description
+   * If the database is a new one and is empty, the collection creation
+   * is implied. It is not written directly to the database but is
+   * added to the list of collections of the empty database in the
+   * `emptyDatabases` array. The collection is only created if a document is
+   * added into it.
+   *
+   * @see emptyDatabases
+   *
+   * @param database name of the database where to add collection.
+   * @param collection name of the new collection to be added.
+   *
+   * @returns `true` if collection was added successfully, else `false`.
+   */
+  async createCollection(database: string, collection: string) {
+    if (this.emptyDatabases?.some((db) => db.name === database)) {
+      this.emptyDatabases = this.emptyDatabases?.map((db) => {
+        if (db.name === database) {
+          db.collections.push(collection);
+        }
+        return db;
+      });
+    } else {
+      try {
+        await this._client?.db(database).createCollection(collection);
       } catch (error) {
         return false;
       }

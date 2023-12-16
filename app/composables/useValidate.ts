@@ -157,6 +157,37 @@ export const useValidate = () => {
     return true;
   };
 
+  /**
+   * Validates that the collection being added does not exist on the
+   * given database.
+   *
+   * @async
+   *
+   * @param database name of the database.
+   * @param collection name of the collection being added.
+   *
+   * @returns true if the collection is valid, else an error message is returned.
+   */
+  const validateCollection = async (database: string, collection: string) => {
+    if (!collection) return "collection is required";
+
+    const emptyDatabase = useDbsInfo().value.empty?.filter(
+      (db) => db.name === database
+    );
+
+    let found = false;
+
+    if (emptyDatabase && emptyDatabase?.length !== 0) {
+      found = emptyDatabase[0].collections.includes(collection);
+    } else {
+      found = await $fetch("/validate/collection", {
+        method: "POST",
+        body: { database, collection },
+      });
+    }
+    return found ? "collection already assigned" : true;
+  };
+
   return {
     validateName,
     validateUri,
@@ -166,5 +197,6 @@ export const useValidate = () => {
     validateUser,
     validatePassword,
     validateDatabase,
+    validateCollection,
   };
 };

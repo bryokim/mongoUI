@@ -8,19 +8,30 @@
         </v-card-text>
       </v-card>
     </v-col>
+
     <v-col cols="6">
       <v-card
         elevation="10"
         class="mb-10 overflow-y-auto mx-auto"
         rounded="lg"
         max-width="400px"
-        max-height="600px"
+        max-height="550px"
       >
         <v-card-text class="pt-0">
           <v-list nav>
             <v-list-item inset class="text-h6">
               <template v-slot:append>
-                <v-icon color="white" size="small"
+                <v-tooltip
+                  activator="parent"
+                  location="top"
+                  text="Add collection"
+                >
+                </v-tooltip>
+                <v-icon
+                  v-if="canCreateCollection"
+                  color="white"
+                  size="small"
+                  @click="createCollectionInput = !createCollectionInput"
                   >mdi-plus-circle-outline</v-icon
                 >
               </template>
@@ -28,6 +39,33 @@
             </v-list-item>
 
             <v-divider color="success" thickness="2px"></v-divider>
+
+            <v-list-item v-if="createCollectionInput" focus>
+              <div>
+                <p
+                  v-if="createCollectionError"
+                  class="mb-3 text-center text-danger rounded"
+                >
+                  {{ createCollectionError }}
+                </p>
+              </div>
+              <v-form
+                v-model="collectionValid"
+                @submit.prevent="createCollection"
+              >
+                <v-text-field
+                  v-model="newCollection"
+                  color="primary"
+                  variant="underlined"
+                  :append-icon="newCollection ? 'mdi-plus' : 'mdi-close'"
+                  :rules="[rules.collectionIsValid]"
+                  single-line
+                  hide-details
+                  focused
+                  @click:append="createCollection"
+                ></v-text-field>
+              </v-form>
+            </v-list-item>
 
             <v-list-item
               v-for="(collection, i) in collections"
@@ -49,8 +87,11 @@
         <v-card-subtitle> Database Actions </v-card-subtitle>
         <v-card-text>
           <div>
-            <p v-if="error" class="mb-3 text-center text-danger rounded">
-              {{ error }}
+            <p
+              v-if="dropDatabaseError"
+              class="mb-3 text-center text-danger rounded"
+            >
+              {{ dropDatabaseError }}
             </p>
           </div>
           <v-dialog
@@ -173,7 +214,7 @@ export default {
       clientInfo: useClientInfo().value,
       valid: false,
       dialog: false,
-      error: "",
+      dropDatabaseError: "",
       newDatabase: {
         database: this.database,
         collection: "",
@@ -185,7 +226,19 @@ export default {
 
           return isValid;
         },
+        collectionIsValid: async (value) => {
+          const isValid = await useValidate().validateCollection(
+            this.database,
+            value
+          );
+
+          return isValid;
+        },
       },
+      newCollection: "",
+      collectionValid: false,
+      createCollectionInput: false,
+      createCollectionError: "",
     };
   },
   computed: {
@@ -225,14 +278,20 @@ export default {
         useRolesInfo().value.dropDatabases?.includes(this.database)
       );
     },
+    canCreateCollection() {
+      return (
+        useRolesInfo().value.superuser ||
+        useRolesInfo().value.collections?.includes(this.database)
+      );
+    },
   },
   methods: {
     validDatabase() {
       return (
-        useDbsInfo().value?.nonEmpty.some(
+        useDbsInfo().value?.nonEmpty?.some(
           (dbInfo) => dbInfo.name === this.database
         ) ||
-        useDbsInfo().value?.empty.some(
+        useDbsInfo().value?.empty?.some(
           (dbInfo) => dbInfo.name === this.database
         )
       );
@@ -260,16 +319,35 @@ export default {
         // navigate to /home after dropping database.
         this.$router.push("/home");
 
-        this.error = "";
+        this.dropDatabaseError = "";
       } catch (error) {
         console.log(error);
-        this.error = error.data.message;
+        this.dropDatabaseError = error.data.message;
       }
 
       this.closeDialog();
     },
     closeDialog() {
       this.dialog = false;
+    },
+    async createCollection() {
+      if (this.collectionValid) {
+        try {
+          await useDb().createCollection(this.database, this.newCollection);
+          this.createCollectionInput = false;
+          this.createCollectionError = "";
+
+          // Navigate to the new collection
+          this.$router.push(`/home/${this.database}/${this.newCollection}`);
+        } catch (error) {
+          this.createCollectionError = error.data.message;
+        }
+
+        this.newCollection = "";
+      } else if (this.newCollection === "") {
+        this.createCollectionInput = false;
+        this.createCollectionError = "";
+      }
     },
   },
 };
