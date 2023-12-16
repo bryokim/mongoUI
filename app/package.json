@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.3.67",
-    "mongodb": "^6.3.0"
+    "mongodb": "^6.3.0",
+    "vue-json-viewer": "3"
   }
 }
