@@ -340,6 +340,34 @@ class Client {
     }
     return true;
   }
+
+  /**
+   * Finds documents in the given page.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param page page to load.
+   * @returns array of documents in the given page.
+   */
+  async findDocumentsInPage(
+    database: string,
+    collection: string,
+    page: number
+  ) {
+    const pageSize = 10;
+    if (this._client) {
+      const documents = await this._client
+        .db(database)
+        .collection(collection)
+        .find({})
+        .skip(page * pageSize)
+        .limit(pageSize)
+        .toArray();
+
+      return documents;
+    }
+    return [];
+  }
 }
 
 let clientInstance = new Client();

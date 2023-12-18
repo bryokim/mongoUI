@@ -8,6 +8,7 @@ import type { AssignedRolesOnDbs } from "./useRolesInfo";
 export const useDb = () => {
   const databasesInfo = useDbsInfo();
   const rolesInfo = useRolesInfo();
+  const pagesInfo = usePage();
 
   const setDbsInfo = (newValue: AllDatabaseInfo) => {
     databasesInfo.value = newValue;
@@ -15,6 +16,12 @@ export const useDb = () => {
 
   const setRolesInfo = (newValue: AssignedRolesOnDbs) => {
     rolesInfo.value = newValue;
+  };
+
+  const setPage = (newValue: number, database: string, collection: string) => {
+    if (!pagesInfo.value[database]) pagesInfo.value[database] = {};
+
+    pagesInfo.value[database][collection] = newValue;
   };
 
   /**
@@ -103,13 +110,56 @@ export const useDb = () => {
     }
   };
 
+  /**
+   * Finds documents in the next page to be added to the display.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param side the side of the infinity scroll being loaded.
+   *
+   * @returns array of documents in the next current page.
+   */
+  const findDocumentsInPage = async (
+    database: string,
+    collection: string,
+    side: string
+  ) => {
+    let nextPage = 0;
+
+    if (pagesInfo.value[database]) {
+      nextPage = pagesInfo.value[database][collection];
+    } else {
+      setPage(0, database, collection);
+    }
+
+    const documents = await $fetch("/api/collection/documents", {
+      method: "GET",
+      query: {
+        database,
+        collection,
+        page: nextPage,
+      },
+    });
+
+    // Increment or decrement page depending on the side being loaded.
+    if (side === "end" && documents.length > 0) {
+      setPage(nextPage + 1, database, collection);
+    } else if (side === "start" && nextPage - 1 >= 0) {
+      setPage(nextPage - 1, database, collection);
+    }
+
+    return documents;
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
+    setPage,
     getDbsInfo,
     getRolesInfo,
     createDb,
     dropDb,
     createCollection,
+    findDocumentsInPage,
   };
 };

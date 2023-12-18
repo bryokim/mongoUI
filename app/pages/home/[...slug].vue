@@ -36,7 +36,10 @@
         </v-col>
 
         <v-col cols="12" v-if="database && collection">
-          <v-card> {{ collection }} </v-card>
+          <CollectionView
+            :database="database"
+            :collection="collection"
+          ></CollectionView>
         </v-col>
       </v-row>
     </v-main>
