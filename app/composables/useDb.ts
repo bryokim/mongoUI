@@ -151,6 +151,31 @@ export const useDb = () => {
     return documents;
   };
 
+  /**
+   * Finds documents that match filter in the given collection.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter search criteria.
+   * @returns documents that match the filter.
+   */
+  const findDocuments = async (
+    database: string,
+    collection: string,
+    filter: { [propName: string]: string }
+  ) => {
+    const documents = await $fetch("/api/documents/find", {
+      method: "POST",
+      body: {
+        database,
+        collection,
+        filter,
+      },
+    });
+
+    return documents;
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
@@ -161,5 +186,6 @@ export const useDb = () => {
     dropDb,
     createCollection,
     findDocumentsInPage,
+    findDocuments,
   };
 };

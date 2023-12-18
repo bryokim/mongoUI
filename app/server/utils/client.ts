@@ -368,6 +368,29 @@ class Client {
     }
     return [];
   }
+
+  /**
+   * Finds documents that match the filter in the given collection.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter search criteria.
+   * @returns documents that match the filter.
+   */
+  async findDocuments(
+    database: string,
+    collection: string,
+    filter: { [propName: string]: any }
+  ) {
+    if (this._client) {
+      return await this._client
+        .db(database)
+        .collection(collection)
+        .find(filter)
+        .toArray();
+    }
+    return [];
+  }
 }
 
 let clientInstance = new Client();

@@ -188,6 +188,24 @@ export const useValidate = () => {
     return found ? "collection already assigned" : true;
   };
 
+  /**
+   * Validates that the filter is a valid JSON string and is not empty.
+   *
+   * @param filter search criteria being entered by the user.
+   * @returns true if the filter is valid, else an error message.
+   */
+  const validateFilter = (filter: string) => {
+    if (!filter) return "filter is required";
+
+    try {
+      JSON.parse(filter);
+    } catch (error) {
+      return "filter must be valid JSON string";
+    }
+
+    return true;
+  };
+
   return {
     validateName,
     validateUri,
@@ -198,5 +216,6 @@ export const useValidate = () => {
     validatePassword,
     validateDatabase,
     validateCollection,
+    validateFilter,
   };
 };
