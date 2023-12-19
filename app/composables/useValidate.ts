@@ -206,6 +206,40 @@ export const useValidate = () => {
     return true;
   };
 
+  /**
+   * Validates that the document is a valid JSON string.
+   * Empty objects and arrays are considered invalid.
+   *
+   * @param document document to be inserted.
+   * @returns true if the document is valid, else an error message.
+   */
+  const validateDocument = (document: string) => {
+    if (!document) return "document is required";
+
+    try {
+      JSON.parse(document);
+    } catch (error) {
+      return "document must be a valid JSON string";
+    }
+
+    const parsedDocument = JSON.parse(document);
+
+    if (Array.isArray(parsedDocument)) {
+      if (parsedDocument.length === 0)
+        return "document cannot be an empty array";
+
+      for (const value of parsedDocument) {
+        if (typeof value !== "object") return "Array can only contain objects";
+        else if (Object.keys(value).length === 0)
+          return "Array contains empty object";
+      }
+    } else if (Object.keys(parsedDocument).length === 0) {
+      return "document cannot be an empty object";
+    }
+
+    return true;
+  };
+
   return {
     validateName,
     validateUri,
@@ -217,5 +251,6 @@ export const useValidate = () => {
     validateDatabase,
     validateCollection,
     validateFilter,
+    validateDocument,
   };
 };

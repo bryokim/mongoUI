@@ -4,7 +4,8 @@
       <v-card v-if="noDocuments" color="warning" rounded="lg" class="py-0 mb-2"
         ><v-card-text class="pa-1 ms-4">
           <v-icon color="black">mdi-alert-circle</v-icon>
-          {{ collection }} is empty
+          {{ collection }} is empty. If you added documents and don't see them,
+          reload page
         </v-card-text>
       </v-card>
 
@@ -120,6 +121,15 @@
         </v-card>
       </v-container>
     </v-col>
+
+    <v-col>
+      <InsertDocument
+        v-if="canInsertDocument"
+        :database="database"
+        :collection="collection"
+        @inserted="load({ side: 'end', done: console.log, inserted: true })"
+      ></InsertDocument>
+    </v-col>
   </v-row>
 </template>
 
@@ -146,8 +156,16 @@ export default {
       foundItems: [],
     };
   },
+  computed: {
+    canInsertDocument() {
+      return (
+        useRolesInfo().value.superuser ||
+        useRolesInfo().value.writeDocument?.includes(this.database)
+      );
+    },
+  },
   methods: {
-    async load({ side, done }) {
+    async load({ side, done, inserted = false }) {
       // Don't load any documents if finding documents.
       if (this.foundItems.length > 0) {
         done("ok");
@@ -157,7 +175,8 @@ export default {
         const documents = await findDocumentsInPage(
           this.database,
           this.collection,
-          side
+          side,
+          inserted
         );
 
         if (documents.length === 0) {

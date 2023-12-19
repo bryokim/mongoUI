@@ -372,6 +372,8 @@ class Client {
   /**
    * Finds documents that match the filter in the given collection.
    *
+   * @async
+   *
    * @param database name of the database.
    * @param collection name of the collection.
    * @param filter search criteria.
@@ -390,6 +392,63 @@ class Client {
         .toArray();
     }
     return [];
+  }
+
+  /**
+   * Inserts a single or multiple documents.
+   * If database was empty, it is created on mongodb and documents added.
+   * The empty database is also removed from the `emptyDatabases`.
+   *
+   * @async
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param document a single document or array of documents to insert.
+   * @returns insertion result.
+   */
+  async insertDocument(
+    database: string,
+    collection: string,
+    document: {} | {}[]
+  ) {
+    if (this._client) {
+      let result;
+      const col = this._client.db(database).collection(collection);
+
+      if (Array.isArray(document)) {
+        result = await col.insertMany(document);
+      } else {
+        result = await col.insertOne(document);
+      }
+
+      // Remove database from empty databases after inserting document.
+      if (this.emptyDatabases?.some((db) => db.name === database)) {
+        this.emptyDatabases = this.emptyDatabases?.filter(
+          (db) => db.name !== database
+        );
+      }
+
+      return result;
+    }
+  }
+
+  /**
+   * Finds one document from a collection.
+   * @async
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @returns a document.
+   */
+  async findOne(database: string, collection: string) {
+    if (this._client) {
+      const document = await this._client
+        .db(database)
+        .collection(collection)
+        .findOne();
+
+      return document;
+    }
+    return {};
   }
 }
 

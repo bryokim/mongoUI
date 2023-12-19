@@ -116,13 +116,15 @@ export const useDb = () => {
    * @param database name of the database.
    * @param collection name of the collection.
    * @param side the side of the infinity scroll being loaded.
+   * @param inserted set `true` when loading after inserting document.
    *
    * @returns array of documents in the next current page.
    */
   const findDocumentsInPage = async (
     database: string,
     collection: string,
-    side: string
+    side: string,
+    inserted: boolean = false
   ) => {
     let nextPage = 0;
 
@@ -131,6 +133,9 @@ export const useDb = () => {
     } else {
       setPage(0, database, collection);
     }
+
+    // Previous page might not have been full.
+    nextPage = inserted && nextPage !== 0 ? nextPage - 1 : nextPage;
 
     const documents = await $fetch("/api/collection/documents", {
       method: "GET",
@@ -153,7 +158,7 @@ export const useDb = () => {
 
   /**
    * Finds documents that match filter in the given collection.
-   *
+   * @async
    * @param database name of the database.
    * @param collection name of the collection.
    * @param filter search criteria.
@@ -176,6 +181,59 @@ export const useDb = () => {
     return documents;
   };
 
+  /**
+   * Inserts documents.
+   * @async
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param document document or array of documents to be inserted.
+   * @returns insertion results.
+   */
+  const insertDocument = async (
+    database: string,
+    collection: string,
+    document: {} | {}[]
+  ) => {
+    const result = await $fetch("/api/documents/insert", {
+      method: "POST",
+      body: {
+        database,
+        collection,
+        document,
+      },
+    });
+
+    // reload databases. Empty databases move to non-empty if a document is added.
+    await getDbsInfo();
+
+    return result;
+  };
+
+  /**
+   * Gets the schema of a collection.
+   * The schema is not fully descriptive and only has a depth of 1.
+   * @async
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @returns schema of the collection.
+   */
+  const getSchema = async (database: string, collection: string) => {
+    const schema: { [propName: string]: string } = await $fetch(
+      "/api/collection/schema",
+      {
+        method: "GET",
+        query: {
+          database,
+          collection,
+        },
+      }
+    );
+
+    return schema;
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
@@ -187,5 +245,7 @@ export const useDb = () => {
     createCollection,
     findDocumentsInPage,
     findDocuments,
+    insertDocument,
+    getSchema,
   };
 };
