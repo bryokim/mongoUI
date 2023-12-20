@@ -450,6 +450,44 @@ class Client {
     }
     return {};
   }
+
+  /**
+   * Updates documents.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter query to filter values to be updated.
+   * @param update changes to be applied to the documents.
+   * @param options options passed to the update action.
+   * @param many whether to update many documents.
+   * @returns result of the update.
+   */
+  async updateDocument(
+    database: string,
+    collection: string,
+    filter: {},
+    update: {},
+    options: {} = {},
+    many: boolean = false
+  ) {
+    if (this._client) {
+      const col = this._client.db(database).collection(collection);
+
+      let result;
+      try {
+        if (many) {
+          result = await col.updateMany(filter, update, options);
+        } else {
+          result = await col.updateOne(filter, update, options);
+        }
+      } catch (error: any) {
+        console.log(error);
+        throw new Error(error.message);
+      }
+
+      return result;
+    }
+  }
 }
 
 let clientInstance = new Client();

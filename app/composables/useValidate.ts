@@ -200,41 +200,68 @@ export const useValidate = () => {
     try {
       JSON.parse(filter);
     } catch (error) {
-      return "filter must be valid JSON string";
+      return "filter must be valid JSON";
     }
 
     return true;
   };
 
   /**
-   * Validates that the document is a valid JSON string.
-   * Empty objects and arrays are considered invalid.
+   * Validates a json value.
    *
-   * @param document document to be inserted.
-   * @returns true if the document is valid, else an error message.
+   * @param json JSON value to validate.
+   * @param fieldName name of the field attached to the value.
+   * @returns true if the json is valid, else an error message.
    */
-  const validateDocument = (document: string) => {
-    if (!document) return "document is required";
+  const validateJSON = (json: string, fieldName: string) => {
+    if (!document) return `${fieldName} is required`;
 
     try {
-      JSON.parse(document);
+      JSON.parse(json);
     } catch (error) {
-      return "document must be a valid JSON string";
+      return `${fieldName} must be a valid JSON`;
     }
 
-    const parsedDocument = JSON.parse(document);
+    const parsedDocument = JSON.parse(json);
 
     if (Array.isArray(parsedDocument)) {
       if (parsedDocument.length === 0)
-        return "document cannot be an empty array";
+        return `${fieldName} cannot be an empty array`;
 
       for (const value of parsedDocument) {
         if (typeof value !== "object") return "Array can only contain objects";
         else if (Object.keys(value).length === 0)
           return "Array contains empty object";
       }
-    } else if (Object.keys(parsedDocument).length === 0) {
-      return "document cannot be an empty object";
+    } else if (
+      Object.keys(parsedDocument).length === 0 &&
+      fieldName !== "filter"
+    ) {
+      return `${fieldName} cannot be an empty object`;
+    } else if (typeof parsedDocument !== "object") {
+      return `${fieldName} must be an object`;
+    }
+
+    return true;
+  };
+
+  /**
+   * Validates options value.
+   *
+   * @param options value to validate.
+   * @returns true if options is valid, else an error message.
+   */
+  const validateOptions = (options: string) => {
+    if (options) {
+      try {
+        JSON.parse(options);
+      } catch (error) {
+        return "options must be valid JSON";
+      }
+
+      if (Array.isArray(options)) {
+        return "options cannot be an array";
+      }
     }
 
     return true;
@@ -251,6 +278,7 @@ export const useValidate = () => {
     validateDatabase,
     validateCollection,
     validateFilter,
-    validateDocument,
+    validateJSON,
+    validateOptions,
   };
 };

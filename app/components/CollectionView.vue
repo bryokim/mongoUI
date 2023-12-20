@@ -123,12 +123,20 @@
     </v-col>
 
     <v-col>
-      <InsertDocument
-        v-if="canInsertDocument"
+      <div class="mb-10">
+        <InsertDocument
+          v-if="canInsertDocument"
+          :database="database"
+          :collection="collection"
+          @inserted="load({ side: 'end', done: console.log, inserted: true })"
+        ></InsertDocument>
+      </div>
+      <UpdateDocument
+        v-if="canUpdateDocument"
         :database="database"
         :collection="collection"
-        @inserted="load({ side: 'end', done: console.log, inserted: true })"
-      ></InsertDocument>
+        @updated="reload"
+      ></UpdateDocument>
     </v-col>
   </v-row>
 </template>
@@ -154,10 +162,17 @@ export default {
         },
       },
       foundItems: [],
+      previousDocuments: 0,
     };
   },
   computed: {
     canInsertDocument() {
+      return (
+        useRolesInfo().value.superuser ||
+        useRolesInfo().value.writeDocument?.includes(this.database)
+      );
+    },
+    canUpdateDocument() {
       return (
         useRolesInfo().value.superuser ||
         useRolesInfo().value.writeDocument?.includes(this.database)
@@ -182,8 +197,16 @@ export default {
         if (documents.length === 0) {
           done("empty");
         } else {
+          // remove last items that will be reloaded.
+          if (inserted) {
+            this.items = this.items.slice(
+              0,
+              this.items.length - this.previousDocuments
+            );
+          }
           this.items.push(...documents);
           done("ok");
+          this.previousDocuments = documents.length;
         }
       }
     },
@@ -203,6 +226,12 @@ export default {
     },
     clearFoundItems() {
       this.foundItems = [];
+    },
+    async reload() {
+      // start loading documents afresh.
+      this.items = [];
+      usePage().value[this.database][this.collection] = 0;
+      await this.load({ side: "end", done: console.log });
     },
   },
   async mounted() {

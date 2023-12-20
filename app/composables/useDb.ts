@@ -234,6 +234,32 @@ export const useDb = () => {
     return schema;
   };
 
+  /**
+   * Updates documents.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter query to filter values to be updated.
+   * @param update changes to be applied to the documents.
+   * @param options options passed to the update action.
+   * @param many whether to update many documents.
+   * @returns result of the update.
+   */
+  const updateDocument = async (
+    database: string,
+    collection: string,
+    filter: {},
+    update: {},
+    options: {} = {},
+    many: boolean = false
+  ) => {
+    const result = await $fetch("/api/documents/update", {
+      method: "POST",
+      body: { database, collection, filter, update, options, many },
+    });
+    return result;
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
@@ -247,5 +273,6 @@ export const useDb = () => {
     findDocuments,
     insertDocument,
     getSchema,
+    updateDocument,
   };
 };
