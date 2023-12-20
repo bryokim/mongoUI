@@ -1,0 +1,13 @@
+# version: "3.3"
+version: "3"
+
+services:
+  nuxt:
+    build:
+      context: .
+    image: mongo_ui
+    container_name: mongo_ui
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
