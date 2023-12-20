@@ -260,6 +260,31 @@ export const useDb = () => {
     return result;
   };
 
+  /**
+   * Deletes documents.
+   *
+   * @async
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter query to filter values to be deleted.
+   * @param options options passed to the delete action.
+   * @param many whether to delete many documents.
+   * @returns result of the delete operation.
+   */
+  const deleteDocument = async (
+    database: string,
+    collection: string,
+    filter: {},
+    options = {},
+    many: boolean = false
+  ) => {
+    const result = await $fetch("/api/documents/delete", {
+      method: "POST",
+      body: { database, collection, filter, options, many },
+    });
+    return result;
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
@@ -274,5 +299,6 @@ export const useDb = () => {
     insertDocument,
     getSchema,
     updateDocument,
+    deleteDocument,
   };
 };

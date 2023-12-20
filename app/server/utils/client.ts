@@ -454,6 +454,7 @@ class Client {
   /**
    * Updates documents.
    *
+   * @async
    * @param database name of the database.
    * @param collection name of the collection.
    * @param filter query to filter values to be updated.
@@ -461,6 +462,8 @@ class Client {
    * @param options options passed to the update action.
    * @param many whether to update many documents.
    * @returns result of the update.
+   *
+   * @throws If the update operation is not successful.
    */
   async updateDocument(
     database: string,
@@ -471,21 +474,50 @@ class Client {
     many: boolean = false
   ) {
     if (this._client) {
-      const col = this._client.db(database).collection(collection);
-
-      let result;
       try {
-        if (many) {
-          result = await col.updateMany(filter, update, options);
-        } else {
-          result = await col.updateOne(filter, update, options);
-        }
+        const col = this._client.db(database).collection(collection);
+
+        return many
+          ? await col.updateMany(filter, update, options)
+          : await col.updateOne(filter, update, options);
       } catch (error: any) {
         console.log(error);
         throw new Error(error.message);
       }
+    }
+  }
 
-      return result;
+  /**
+   * Deletes documents.
+   *
+   * @async
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter query to filter values to be deleted.
+   * @param options options passed to the delete action.
+   * @param many whether to delete many documents.
+   * @returns result of the delete operation.
+   *
+   * @throws If the delete operation is not successful.
+   */
+  async deleteDocument(
+    database: string,
+    collection: string,
+    filter: {},
+    options = {},
+    many: boolean = false
+  ) {
+    if (this._client) {
+      try {
+        const col = this._client.db(database).collection(collection);
+
+        return many
+          ? await col.deleteMany(filter, options)
+          : await col.deleteOne(filter, options);
+      } catch (error: any) {
+        console.log(error);
+        throw new Error(error.message);
+      }
     }
   }
 }

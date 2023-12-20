@@ -125,18 +125,27 @@
     <v-col>
       <div class="mb-10">
         <InsertDocument
-          v-if="canInsertDocument"
+          v-if="canWriteDocument"
           :database="database"
           :collection="collection"
           @inserted="load({ side: 'end', done: console.log, inserted: true })"
         ></InsertDocument>
       </div>
-      <UpdateDocument
-        v-if="canUpdateDocument"
+      <div class="mb-10">
+        <UpdateDocument
+          v-if="canWriteDocument"
+          :database="database"
+          :collection="collection"
+          @updated="reload"
+        ></UpdateDocument>
+      </div>
+
+      <DeleteDocument
+        v-if="canWriteDocument"
         :database="database"
         :collection="collection"
-        @updated="reload"
-      ></UpdateDocument>
+        @deleted="reload"
+      ></DeleteDocument>
     </v-col>
   </v-row>
 </template>
@@ -166,13 +175,7 @@ export default {
     };
   },
   computed: {
-    canInsertDocument() {
-      return (
-        useRolesInfo().value.superuser ||
-        useRolesInfo().value.writeDocument?.includes(this.database)
-      );
-    },
-    canUpdateDocument() {
+    canWriteDocument() {
       return (
         useRolesInfo().value.superuser ||
         useRolesInfo().value.writeDocument?.includes(this.database)
@@ -195,6 +198,7 @@ export default {
         );
 
         if (documents.length === 0) {
+          this.noDocuments = this.items.length === 0 ? true : false;
           done("empty");
         } else {
           // remove last items that will be reloaded.
