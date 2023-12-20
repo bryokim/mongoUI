@@ -169,7 +169,7 @@ export default {
       newDocument: "",
       rules: {
         validateDocument: (value) => {
-          return useValidate().validateDocument(value);
+          return useValidate().validateJSON(value, "document");
         },
       },
       result: "",
