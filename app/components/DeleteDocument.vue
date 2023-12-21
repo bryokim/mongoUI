@@ -124,6 +124,7 @@
 </template>
 
 <script>
+import hljs from "highlight.js";
 import CodeEditor from "simple-code-editor/CodeEditor";
 
 export default {
