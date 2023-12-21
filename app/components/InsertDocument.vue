@@ -16,94 +16,53 @@
         <v-toolbar-title>Insert document</v-toolbar-title>
       </v-toolbar>
 
-      <v-chip
-        style="
-          position: absolute;
-          width: 280px;
-          top: 67px;
-          margin-left: auto;
-          margin-right: auto;
-          left: 0;
-          right: 0;
-        "
-        v-if="insertedSuccessfully"
-        color="success"
-        closable
-        @click:close="insertedSuccessfully = false"
-      >
-        Document inserted successfully
-      </v-chip>
-
-      <v-chip
-        style="
-          position: absolute;
-          width: 280px;
-          top: 67px;
-          margin-left: auto;
-          margin-right: auto;
-          left: 0;
-          right: 0;
-        "
-        color="error"
-        variant="flat"
-        v-if="insertedUnsuccessfully"
-        closable
-        @click:close="insertedUnsuccessfully = false"
-      >
-        Error while inserting document
-      </v-chip>
-
       <v-row>
+        <v-col cols="3"></v-col>
         <v-col cols="6">
-          <v-sheet class="ms-16">
-            <v-card-text>
-              <div>
-                Inserting into
-                <v-chip color="secondary" variant="outlined">{{
-                  collection
-                }}</v-chip>
-                collection in the
-                <v-chip color="primary" variant="outlined">{{
-                  database
-                }}</v-chip>
-                database.
-              </div>
-              <v-form
-                ref="form"
-                v-model="valid"
-                class="mt-10"
-                @submit.prevent="insert"
-                fast-fail
-              >
-                <p class="mb-5">
-                  Enter your document below. Can be a single document or array
-                  of documents
-                </p>
-                <v-textarea
-                  v-model="newDocument"
-                  variant="outlined"
-                  bg-color="#1B1E2C"
-                  rounded="lg"
-                  spellcheck="false"
-                  :rules="[rules.validateDocument]"
-                  @update:focused="onBlur"
-                  auto-grow
-                  clearable
-                ></v-textarea>
+          <v-sheet>
+            <div class="my-10">
+              Inserting into
+              <v-chip color="secondary" variant="flat">{{ collection }}</v-chip>
+              collection in the
+              <v-chip color="primary" variant="flat">{{ database }}</v-chip>
+              database.
+            </div>
 
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <VBtnBlock color="success" type="submit"
-                    >Insert Document(s)</VBtnBlock
-                  >
-                </v-card-actions>
-              </v-form>
-            </v-card-text>
+            <p class="mb-5">
+              Enter your document below. Can be a single document or array of
+              documents
+            </p>
+
+            <div class="mb-10">
+              <ClientOnly>
+                <CodeEditor
+                  class="mb-1"
+                  v-model="newDocument"
+                  :languages="[['json', 'JSON']]"
+                  :line-nums="true"
+                  theme="vs2015"
+                  width="100%"
+                >
+                </CodeEditor>
+              </ClientOnly>
+              <div v-if="error" class="text-center">
+                <v-chip
+                  variant="flat"
+                  color="danger"
+                  prepend-icon="mdi-alert-circle"
+                  >{{ error }}</v-chip
+                >
+              </div>
+            </div>
+
+            <VBtnBlock color="success" @click="insert"
+              >Insert Document(s)</VBtnBlock
+            >
           </v-sheet>
 
           <v-sheet
             v-if="result"
-            class="ms-16 pa-5"
+            class="mt-16 pa-5"
             :elevation="10"
             rounded="lg"
           >
@@ -112,54 +71,66 @@
           </v-sheet>
         </v-col>
 
-        <v-spacer></v-spacer>
+        <v-snackbar
+          v-model="insertedSuccessfully"
+          color="success"
+          :timeout="timeout"
+          :elevation="24"
+          :timer="true"
+          variant="outlined"
+          location="top right"
+          rounded="lg"
+          class="mt-16"
+        >
+          Document inserted successfully
 
-        <v-col cols="4" class="me-10">
-          <v-container>
-            <v-expansion-panels variant="popout">
-              <v-expansion-panel rounded="lg">
-                <v-expansion-panel-title>
-                  Collection Schema
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <JsonViewer
-                    :value="collectionSchema"
-                    theme="my-theme"
-                  ></JsonViewer>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-              <v-expansion-panel rounded="lg">
-                <v-expansion-panel-title>
-                  Example Inputs
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <div>
-                    <v-sheet class="pa-2 mb-3" rounded="lg" :elevation="10">
-                      <p class="mb-5">Single Document:</p>
-                      <pre><code>{{ exampleDocument }}</code></pre>
-                    </v-sheet>
-                    <v-sheet class="pa-2" rounded="lg" :elevation="10">
-                      <p class="mb-5">Multiple Documents in array:</p>
-                      <pre><code>{{ exampleDocuments }}</code></pre>
-                    </v-sheet>
-                  </div>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-          </v-container>
-        </v-col>
+          <template v-slot:actions>
+            <v-btn
+              color="danger"
+              variant="text"
+              @click="insertedSuccessfully = false"
+            >
+              Close
+            </v-btn>
+          </template>
+        </v-snackbar>
+
+        <v-snackbar
+          v-model="insertedUnsuccessfully"
+          color="error"
+          :elevation="24"
+          variant="flat"
+          location="top right"
+          rounded="lg"
+          class="mt-16"
+        >
+          Error while inserting document
+
+          <template v-slot:actions>
+            <v-btn
+              color="white"
+              variant="text"
+              @click="insertedUnsuccessfully = false"
+            >
+              Close
+            </v-btn>
+          </template>
+        </v-snackbar>
       </v-row>
     </v-card>
   </v-dialog>
 </template>
 
 <script>
+import hljs from "highlight.js";
+import CodeEditor from "simple-code-editor/CodeEditor";
 import JsonViewer from "vue-json-viewer/ssr";
 
 export default {
   props: ["database", "collection"],
   emits: ["inserted"],
   components: {
+    CodeEditor,
     JsonViewer,
   },
   data() {
@@ -173,67 +144,55 @@ export default {
         },
       },
       result: "",
+      timeout: 4000,
       insertedSuccessfully: false,
       insertedUnsuccessfully: false,
-      collectionSchema: "",
-      exampleDocument: {
-        name: "One",
-        age: 23,
-        location: "Here",
-        phone: 986038224,
-      },
-      exampleDocuments: [
-        {
-          name: "One",
-          age: 23,
-          location: "Here",
-          phone: 986038224,
-        },
-        {
-          name: "Two",
-          age: 21,
-          location: "There",
-          phone: 967038224,
-        },
-      ],
+      error: "",
     };
   },
   methods: {
-    async insert(values) {
-      const { valid } = await values;
+    async insert() {
+      if (!this.validate()) return;
 
-      if (valid) {
-        const { insertDocument } = useDb();
+      const { insertDocument } = useDb();
 
-        const isEmpty = useDbsInfo().value.empty?.some(
-          (db) => db.name === this.database
+      const isEmpty = useDbsInfo().value.empty?.some(
+        (db) => db.name === this.database
+      );
+
+      let result;
+      try {
+        result = await insertDocument(
+          this.database,
+          this.collection,
+          JSON.parse(this.newDocument)
         );
-
-        let result;
-        try {
-          result = await insertDocument(
-            this.database,
-            this.collection,
-            JSON.parse(this.newDocument)
-          );
-          this.insertedSuccessfully = true;
-          this.insertedUnsuccessfully = false;
-        } catch (error) {
-          result = error.message;
-          this.insertedUnsuccessfully = true;
-        }
-
-        this.result = result;
-        this.$refs.form.reset();
+        this.insertedSuccessfully = true;
+        this.insertedUnsuccessfully = false;
         this.$emit("inserted");
+      } catch (error) {
+        result = error.message;
+        this.insertedUnsuccessfully = true;
+      }
 
-        if (isEmpty) {
-          await this.$router.push(`/home/${this.database}`);
-        }
+      this.result = result;
+
+      if (isEmpty) {
+        await this.$router.push(`/home/${this.database}`);
       }
     },
-    onBlur() {
-      this.$refs.form.resetValidation();
+    validate() {
+      const { validateJSON } = useValidate();
+
+      this.error = "";
+
+      const documentIsValid = validateJSON(this.newDocument, "document");
+      if (typeof documentIsValid === "string") {
+        this.error = documentIsValid;
+        return false;
+      }
+
+      return true;
     },
     close() {
       this.dialog = false;
@@ -241,16 +200,6 @@ export default {
       this.insertedUnsuccessfully = false;
       this.result = "";
     },
-    async schema() {
-      const { getSchema } = useDb();
-
-      const result = await getSchema(this.database, this.collection);
-
-      this.collectionSchema = result;
-    },
-  },
-  async mounted() {
-    await this.schema();
   },
 };
 </script>
