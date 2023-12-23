@@ -1,6 +1,14 @@
 <template>
   <v-toolbar id="navbar" :elevation="8">
-    <v-toolbar-title class="title">MongoUI</v-toolbar-title>
+    <NuxtLink to="/home">
+      <v-toolbar-title class="ms-4">
+        <v-img src="~/assets/images/logo.svg" alt="mongoUI" :width="280">
+          <template v-slot:error>
+            <div class="title">mongoUI</div>
+          </template>
+        </v-img>
+      </v-toolbar-title>
+    </NuxtLink>
     <v-spacer></v-spacer>
 
     <div class="me-4">
@@ -36,7 +44,7 @@ export default {
   background: #316a99;
   height: 75px;
 }
-#navbar .title {
+.title {
   color: #91fd94;
   font-family: Antic Slab, sans-serif;
   font-size: 48px;
