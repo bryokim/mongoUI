@@ -21,28 +21,28 @@ class Client {
   /**
    * @property mongodb connection uri.
    */
-  _uri?: string;
+  #uri?: string;
 
   /**
    * @property unique name given to the connection.
    */
-  _name?: string;
+  #name?: string;
 
   /**
    * @property authenticated user.
    */
-  _user?: string;
+  #user?: string;
 
   /**
    * @property instance of MongoClient created using given uri.
    */
-  _client?: MongoClient;
+  #client?: MongoClient;
 
   /**
    * @property new databases that are empty and are yet to be created
    * in the mongodb.
    */
-  emptyDatabases?: DatabaseInfo[];
+  #emptyDatabases?: DatabaseInfo[];
 
   /**
    * Creates a new Client instance.
@@ -61,31 +61,31 @@ class Client {
   }
 
   /**
-   * @property Retrieve the _client property.
+   * @property Retrieve the #client property.
    */
   get client() {
-    return this._client;
+    return this.#client;
   }
 
   /**
-   * @property Retrieve the _uri property.
+   * @property Retrieve the #uri property.
    */
   get uri() {
-    return this._uri;
+    return this.#uri;
   }
 
   /**
-   * @property Retrieve the _user property.
+   * @property Retrieve the #user property.
    */
   get user() {
-    return this._user;
+    return this.#user;
   }
 
   /**
-   * @property Retrieve the _name property.
+   * @property Retrieve the #name property.
    */
   get name() {
-    return this._name;
+    return this.#name;
   }
 
   /**
@@ -105,24 +105,24 @@ class Client {
       throw new Error("Must provide name");
     }
 
-    if (!this._client) {
+    if (!this.#client) {
       try {
-        this._client = new MongoClient(options.uri, {
+        this.#client = new MongoClient(options.uri, {
           connectTimeoutMS: 5000,
           serverSelectionTimeoutMS: 5000,
         });
 
-        await this._client?.connect();
+        await this.#client?.connect();
       } catch (error: any) {
         await this.closeClient();
-        this._client = undefined;
+        this.#client = undefined;
         throw new Error(error.message);
       }
 
-      this._name = options.name;
-      this._uri = options.uri;
-      this._user = parseUri(options.uri).user;
-      this.emptyDatabases = [];
+      this.#name = options.name;
+      this.#uri = options.uri;
+      this.#user = parseUri(options.uri).user;
+      this.#emptyDatabases = [];
     } else {
       console.log("Client already assigned");
     }
@@ -134,8 +134,8 @@ class Client {
    * @async
    */
   async closeClient() {
-    if (this._client) {
-      await this._client.close();
+    if (this.#client) {
+      await this.#client.close();
     }
   }
 
@@ -148,11 +148,11 @@ class Client {
   async clearCurrentClient() {
     await this.closeClient();
 
-    this._client = undefined;
-    this._uri = undefined;
-    this._name = undefined;
-    this._user = undefined;
-    this.emptyDatabases = undefined;
+    this.#client = undefined;
+    this.#uri = undefined;
+    this.#name = undefined;
+    this.#user = undefined;
+    this.#emptyDatabases = undefined;
   }
 
   /**
@@ -163,8 +163,8 @@ class Client {
    * @returns list of all databases.
    */
   async databases() {
-    if (this._client) {
-      return (await this._client?.db().admin().listDatabases())?.databases.map(
+    if (this.#client) {
+      return (await this.#client?.db().admin().listDatabases())?.databases.map(
         (db) => db.name
       );
     }
@@ -181,8 +181,8 @@ class Client {
    * @returns list of all collections in the database.
    */
   async collections(database: string) {
-    if (this._client) {
-      const collectionObjects = await this._client
+    if (this.#client) {
+      const collectionObjects = await this.#client
         .db(database)
         .listCollections()
         .toArray();
@@ -201,12 +201,12 @@ class Client {
    * @returns list of roles that the user has.
    */
   async userRoles() {
-    if (this._client) {
+    if (this.#client) {
       const roles: Role[] = (
-        await this._client
+        await this.#client
           .db()
           .admin()
-          .command({ usersInfo: { user: this._user, db: "admin" } })
+          .command({ usersInfo: { user: this.#user, db: "admin" } })
       ).users[0].roles;
 
       return roles;
@@ -244,7 +244,7 @@ class Client {
 
     const dbsAndCols: AllDatabaseInfo = { nonEmpty: [], empty: [] };
 
-    if (databases && this._client) {
+    if (databases && this.#client) {
       const allRoles = await this.userRoles();
 
       for (let database of databases) {
@@ -262,13 +262,13 @@ class Client {
       }
     }
 
-    dbsAndCols.empty = this.emptyDatabases;
+    dbsAndCols.empty = this.#emptyDatabases;
 
     return dbsAndCols;
   }
 
   /**
-   * Adds a new database to the emptyDatabases array.
+   * Adds a new database to the #emptyDatabases array.
    *
    * The database is not created on the mongodb until the first
    * document is added.
@@ -277,8 +277,8 @@ class Client {
    * @param collection name of new collection.
    */
   addDatabase(database: string, collection: string) {
-    if (!this.emptyDatabases?.some((db) => db.name === database)) {
-      this.emptyDatabases?.push({ name: database, collections: [collection] });
+    if (!this.#emptyDatabases?.some((db) => db.name === database)) {
+      this.#emptyDatabases?.push({ name: database, collections: [collection] });
     }
   }
 
@@ -292,13 +292,13 @@ class Client {
    * @returns `true` if the database is dropped successfully else `false`.
    */
   async dropDatabase(database: string) {
-    if (this.emptyDatabases?.some((db) => db.name === database)) {
-      this.emptyDatabases = this.emptyDatabases?.filter(
+    if (this.#emptyDatabases?.some((db) => db.name === database)) {
+      this.#emptyDatabases = this.#emptyDatabases?.filter(
         (db) => db.name !== database
       );
     } else {
       try {
-        await this._client?.db(database).dropDatabase();
+        await this.#client?.db(database).dropDatabase();
       } catch (error) {
         return false;
       }
@@ -313,10 +313,10 @@ class Client {
    * If the database is a new one and is empty, the collection creation
    * is implied. It is not written directly to the database but is
    * added to the list of collections of the empty database in the
-   * `emptyDatabases` array. The collection is only created if a document is
+   * `#emptyDatabases` array. The collection is only created if a document is
    * added into it.
    *
-   * @see emptyDatabases
+   * @see #emptyDatabases
    *
    * @param database name of the database where to add collection.
    * @param collection name of the new collection to be added.
@@ -324,8 +324,8 @@ class Client {
    * @returns `true` if collection was added successfully, else `false`.
    */
   async createCollection(database: string, collection: string) {
-    if (this.emptyDatabases?.some((db) => db.name === database)) {
-      this.emptyDatabases = this.emptyDatabases?.map((db) => {
+    if (this.#emptyDatabases?.some((db) => db.name === database)) {
+      this.#emptyDatabases = this.#emptyDatabases?.map((db) => {
         if (db.name === database) {
           db.collections.push(collection);
         }
@@ -333,7 +333,7 @@ class Client {
       });
     } else {
       try {
-        await this._client?.db(database).createCollection(collection);
+        await this.#client?.db(database).createCollection(collection);
       } catch (error) {
         return false;
       }
@@ -355,8 +355,8 @@ class Client {
     page: number
   ) {
     const pageSize = 10;
-    if (this._client) {
-      const documents = await this._client
+    if (this.#client) {
+      const documents = await this.#client
         .db(database)
         .collection(collection)
         .find({})
@@ -384,8 +384,8 @@ class Client {
     collection: string,
     filter: { [propName: string]: any }
   ) {
-    if (this._client) {
-      return await this._client
+    if (this.#client) {
+      return await this.#client
         .db(database)
         .collection(collection)
         .find(filter)
@@ -397,7 +397,7 @@ class Client {
   /**
    * Inserts a single or multiple documents.
    * If database was empty, it is created on mongodb and documents added.
-   * The empty database is also removed from the `emptyDatabases`.
+   * The empty database is also removed from the `#emptyDatabases`.
    *
    * @async
    *
@@ -411,9 +411,9 @@ class Client {
     collection: string,
     document: {} | {}[]
   ) {
-    if (this._client) {
+    if (this.#client) {
       let result;
-      const col = this._client.db(database).collection(collection);
+      const col = this.#client.db(database).collection(collection);
 
       if (Array.isArray(document)) {
         result = await col.insertMany(document);
@@ -422,8 +422,8 @@ class Client {
       }
 
       // Remove database from empty databases after inserting document.
-      if (this.emptyDatabases?.some((db) => db.name === database)) {
-        this.emptyDatabases = this.emptyDatabases?.filter(
+      if (this.#emptyDatabases?.some((db) => db.name === database)) {
+        this.#emptyDatabases = this.#emptyDatabases?.filter(
           (db) => db.name !== database
         );
       }
@@ -440,8 +440,8 @@ class Client {
    * @returns a document.
    */
   async findOne(database: string, collection: string) {
-    if (this._client) {
-      const document = await this._client
+    if (this.#client) {
+      const document = await this.#client
         .db(database)
         .collection(collection)
         .findOne();
@@ -473,9 +473,9 @@ class Client {
     options: {} = {},
     many: boolean = false
   ) {
-    if (this._client) {
+    if (this.#client) {
       try {
-        const col = this._client.db(database).collection(collection);
+        const col = this.#client.db(database).collection(collection);
 
         return many
           ? await col.updateMany(filter, update, options)
@@ -507,9 +507,9 @@ class Client {
     options = {},
     many: boolean = false
   ) {
-    if (this._client) {
+    if (this.#client) {
       try {
-        const col = this._client.db(database).collection(collection);
+        const col = this.#client.db(database).collection(collection);
 
         return many
           ? await col.deleteMany(filter, options)
