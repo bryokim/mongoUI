@@ -7,7 +7,7 @@
     >
       <div class="mb-16">
         <h2 class="text-h4 font-weight-medium">
-          Welcome to <span class="name">MongoUI</span>.
+          Welcome to <span class="name">mongoUI</span>.
         </h2>
       </div>
 
@@ -43,7 +43,7 @@ export default {
 <style>
 .name {
   color: #91fd94;
-  font-family: Antic Slab, sans-serif;
+  font-family: 'Montserrat Alternates', sans-serif;
   font-size: 40px;
   font-style: normal;
   font-weight: 500;

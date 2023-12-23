@@ -46,7 +46,7 @@ export default {
 }
 .title {
   color: #91fd94;
-  font-family: Antic Slab, sans-serif;
+  font-family: "Montserrat Alternates", sans-serif;
   font-size: 48px;
   line-height: normal;
   margin-left: 50px;
