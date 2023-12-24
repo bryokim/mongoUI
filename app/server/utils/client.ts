@@ -89,6 +89,13 @@ class Client {
   }
 
   /**
+   * @property Retrieve the `#emptyDatabases` property.
+   */
+  get emptyDatabases() {
+    return this.#emptyDatabases;
+  }
+
+  /**
    * Creates a MongoClient instance with the user connection options.
    *
    * @async
