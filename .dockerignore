@@ -1,8 +1,12 @@
 # .dockerignore
-/.nuxt
-/.output
-/.test_data
-/node_modules
+.test_data
+.data
+.nuxt
+.output
+.test_data
+tests
+node_modules
 
 .gitignore
 README.md
+LICENSE
