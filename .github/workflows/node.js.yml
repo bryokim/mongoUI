@@ -10,8 +10,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-
+  unit-testing:
     runs-on: ubuntu-latest
 
     strategy:
@@ -20,14 +19,20 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      env:
-        TEST_USER: ${{ secrets.TEST_USER }}
-        TEST_URI: ${{ secrets.TEST_URI }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm install
-    - run: npm run test:unit
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: create env file
+        run: |
+            touch .env
+            echo TEST_USER=${{ secrets.TEST_USER }} >> .env
+            echo TEST_URI=${{secrets.TEST_URI }} >> .env
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - run: npm install
+      - run: npm run test:unit
