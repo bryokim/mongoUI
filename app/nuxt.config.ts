@@ -13,6 +13,7 @@ export default defineNuxtConfig({
         config.plugins.push(vuetify({ autoImport: true }));
       });
     },
+    "@nuxt/test-utils/module",
   ],
   vite: {
     vue: {
@@ -25,16 +26,16 @@ export default defineNuxtConfig({
     // Production
     storage: {
       db: {
-        driver: 'fs',
-        base: './.data/db'
-      }
+        driver: "fs",
+        base: "./.data/db",
+      },
     },
     // Development
     devStorage: {
       db: {
-        driver: 'fs',
-        base: './.test_data/db'
-      }
-    }
-  }
+        driver: "fs",
+        base: "./.test_data/db",
+      },
+    },
+  },
 });
