@@ -61,28 +61,28 @@ class Client {
   }
 
   /**
-   * @property Retrieve the #client property.
+   * @property Retrieve the `#client` property.
    */
   get client() {
     return this.#client;
   }
 
   /**
-   * @property Retrieve the #uri property.
+   * @property Retrieve the `#uri` property.
    */
   get uri() {
     return this.#uri;
   }
 
   /**
-   * @property Retrieve the #user property.
+   * @property Retrieve the `#user` property.
    */
   get user() {
     return this.#user;
   }
 
   /**
-   * @property Retrieve the #name property.
+   * @property Retrieve the `#name` property.
    */
   get name() {
     return this.#name;
@@ -93,6 +93,29 @@ class Client {
    */
   get emptyDatabases() {
     return this.#emptyDatabases;
+  }
+
+  /**
+   * Validates if arguments are of the correct type.
+   * 
+   * @param obj Object of the arguments to validate.
+   * 
+   * @throws If arguments are not of the expected type.
+   */
+  validateArgs(obj: { [propName: string]: any }) {
+    const keys = Object.keys(obj);
+
+    if (keys.includes("database") && typeof obj.database !== "string")
+      throw Error("database must be a string");
+
+    if (keys.includes("collection") && typeof obj.collection !== "string")
+      throw Error("collection must be a string");
+
+    if (keys.includes("roles") && !Array.isArray(obj.roles))
+      throw Error("roles must be an array");
+
+    if (keys.includes("page") && typeof obj.page !== "number")
+      throw Error("page must be a number");
   }
 
   /**
@@ -186,8 +209,16 @@ class Client {
    * @param database name of the database.
    *
    * @returns list of all collections in the database.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   async collections(database: string) {
+    try {
+      this.validateArgs({ database });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (this.#client) {
       const collectionObjects = await this.#client
         .db(database)
@@ -229,8 +260,16 @@ class Client {
    * @param roles array of all the roles the user has.
    *
    * @returns roles the user has in database given.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   getUserRolesInDb(database: string, roles: Role[]) {
+    try {
+      this.validateArgs({ database, roles });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     return roles
       .filter((role) => role.db === database)
       .map((role) => role.role);
@@ -282,8 +321,16 @@ class Client {
    *
    * @param database name of the new database.
    * @param collection name of new collection.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   addDatabase(database: string, collection: string) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (!this.#emptyDatabases?.some((db) => db.name === database)) {
       this.#emptyDatabases?.push({ name: database, collections: [collection] });
     }
@@ -297,8 +344,16 @@ class Client {
    * @param database name of the database to drop.
    *
    * @returns `true` if the database is dropped successfully else `false`.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   async dropDatabase(database: string) {
+    try {
+      this.validateArgs({ database });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (this.#emptyDatabases?.some((db) => db.name === database)) {
       this.#emptyDatabases = this.#emptyDatabases?.filter(
         (db) => db.name !== database
@@ -327,10 +382,17 @@ class Client {
    *
    * @param database name of the database where to add collection.
    * @param collection name of the new collection to be added.
-   *
    * @returns `true` if collection was added successfully, else `false`.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   async createCollection(database: string, collection: string) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (this.#emptyDatabases?.some((db) => db.name === database)) {
       this.#emptyDatabases = this.#emptyDatabases?.map((db) => {
         if (db.name === database) {
@@ -355,12 +417,20 @@ class Client {
    * @param collection name of the collection.
    * @param page page to load.
    * @returns array of documents in the given page.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   async findDocumentsInPage(
     database: string,
     collection: string,
     page: number
   ) {
+    try {
+      this.validateArgs({ database, collection, page });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     const pageSize = 10;
     if (this.#client) {
       const documents = await this.#client
@@ -385,12 +455,20 @@ class Client {
    * @param collection name of the collection.
    * @param filter search criteria.
    * @returns documents that match the filter.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   async findDocuments(
     database: string,
     collection: string,
     filter: { [propName: string]: any }
   ) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (this.#client) {
       return await this.#client
         .db(database)
@@ -412,12 +490,20 @@ class Client {
    * @param collection name of the collection.
    * @param document a single document or array of documents to insert.
    * @returns insertion result.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   async insertDocument(
     database: string,
     collection: string,
     document: {} | {}[]
   ) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (this.#client) {
       let result;
       const col = this.#client.db(database).collection(collection);
@@ -445,8 +531,16 @@ class Client {
    * @param database name of the database.
    * @param collection name of the collection.
    * @returns a document.
+   * 
+   * @throws If arguments are not of the expected type.
    */
   async findOne(database: string, collection: string) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (this.#client) {
       const document = await this.#client
         .db(database)
@@ -470,6 +564,7 @@ class Client {
    * @param many whether to update many documents.
    * @returns result of the update.
    *
+   * @throws If arguments are not of the expected type.
    * @throws If the update operation is not successful.
    */
   async updateDocument(
@@ -480,6 +575,12 @@ class Client {
     options: {} = {},
     many: boolean = false
   ) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (this.#client) {
       try {
         const col = this.#client.db(database).collection(collection);
@@ -505,6 +606,7 @@ class Client {
    * @param many whether to delete many documents.
    * @returns result of the delete operation.
    *
+   * @throws If arguments are not of the expected type.
    * @throws If the delete operation is not successful.
    */
   async deleteDocument(
@@ -514,6 +616,12 @@ class Client {
     options = {},
     many: boolean = false
   ) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
     if (this.#client) {
       try {
         const col = this.#client.db(database).collection(collection);
