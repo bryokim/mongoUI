@@ -114,8 +114,12 @@ class Client {
     if (keys.includes("roles") && !Array.isArray(obj.roles))
       throw Error("roles must be an array");
 
-    if (keys.includes("page") && typeof obj.page !== "number")
-      throw Error("page must be a number");
+    if (keys.includes("page"))
+      try {
+        parseInt(obj.page);
+      } catch (error) {
+        throw Error("page must be a number");
+      }
   }
 
   /**
