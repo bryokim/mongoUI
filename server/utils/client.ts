@@ -97,9 +97,9 @@ class Client {
 
   /**
    * Validates if arguments are of the correct type.
-   * 
+   *
    * @param obj Object of the arguments to validate.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   validateArgs(obj: { [propName: string]: any }) {
@@ -209,7 +209,7 @@ class Client {
    * @param database name of the database.
    *
    * @returns list of all collections in the database.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   async collections(database: string) {
@@ -260,7 +260,7 @@ class Client {
    * @param roles array of all the roles the user has.
    *
    * @returns roles the user has in database given.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   getUserRolesInDb(database: string, roles: Role[]) {
@@ -321,7 +321,7 @@ class Client {
    *
    * @param database name of the new database.
    * @param collection name of new collection.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   addDatabase(database: string, collection: string) {
@@ -344,7 +344,7 @@ class Client {
    * @param database name of the database to drop.
    *
    * @returns `true` if the database is dropped successfully else `false`.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   async dropDatabase(database: string) {
@@ -383,7 +383,7 @@ class Client {
    * @param database name of the database where to add collection.
    * @param collection name of the new collection to be added.
    * @returns `true` if collection was added successfully, else `false`.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   async createCollection(database: string, collection: string) {
@@ -417,7 +417,7 @@ class Client {
    * @param collection name of the collection.
    * @param page page to load.
    * @returns array of documents in the given page.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   async findDocumentsInPage(
@@ -455,7 +455,7 @@ class Client {
    * @param collection name of the collection.
    * @param filter search criteria.
    * @returns documents that match the filter.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   async findDocuments(
@@ -490,7 +490,7 @@ class Client {
    * @param collection name of the collection.
    * @param document a single document or array of documents to insert.
    * @returns insertion result.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   async insertDocument(
@@ -531,7 +531,7 @@ class Client {
    * @param database name of the database.
    * @param collection name of the collection.
    * @returns a document.
-   * 
+   *
    * @throws If arguments are not of the expected type.
    */
   async findOne(database: string, collection: string) {

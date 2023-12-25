@@ -9,10 +9,10 @@ WORKDIR /app
 # Build
 FROM base as build
 
-COPY --link ./app/package.json ./
+COPY --link package.json .
 RUN npm install --production=false
 
-COPY --link ./app .
+COPY --link . .
 
 RUN npm run build
 RUN npm prune

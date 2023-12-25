@@ -21,12 +21,6 @@ git clone https://github.com/bryokim/mongoUI.git
 
 ### Setting up without Docker
 
-Move to the app directory:
-
-```Bash
-cd app
-```
-
 Make sure to install the dependencies:
 
 ```Bash
