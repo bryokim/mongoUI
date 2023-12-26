@@ -7,7 +7,7 @@ export type parsedUri = {
   password?: string;
   host?: string;
   port?: number;
-  params?: { key: string; value: string }[];
+  params?: { [propName: string]: string };
   error?: string;
 };
 
@@ -33,11 +33,11 @@ export const parseUri = (uri: string): parsedUri => {
       port: parseInt(output[5]?.slice(1)),
       params: output[7]
         ?.split("&")
-        .map((param) => {
+        .reduce((acc: { [propName: string]: string }, param) => {
           const [key, value] = param.split("=", 2);
-          return { key, value };
-        })
-        .filter((param) => param.key),
+          if (key) acc[key] = value;
+          return acc;
+        }, {}),
     };
   } else {
     return {
@@ -53,7 +53,7 @@ interface Role {
 
 /**
  * Adds databases to their allowed actions.
- * 
+ *
  * @param parsedRoles parsedRoles object.
  * @param databases databases that are being added.
  * @param dropDatabases whether the dropDatabases action is to be added.
