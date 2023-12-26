@@ -13,7 +13,7 @@ import { MongoClient } from "mongodb";
 import clientInstance from "~/server/utils/client";
 import { parseUri } from "~/server/utils/parse";
 
-config({ path: "tests/.test.env" });
+config();
 
 describe("client", () => {
   const connectionOptions = {
