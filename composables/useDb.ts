@@ -158,16 +158,21 @@ export const useDb = () => {
 
   /**
    * Finds documents that match filter in the given collection.
+   * If `many` is set to `false`, filter is not considered when
    * @async
    * @param database name of the database.
    * @param collection name of the collection.
+   * @param many Whether to find multiple documents. Set to `false` to `findOne`.
    * @param filter search criteria.
+   * @param options optional settings passed to the command.
    * @returns documents that match the filter.
    */
   const findDocuments = async (
     database: string,
     collection: string,
-    filter: { [propName: string]: string }
+    many = true,
+    filter = {},
+    options = {}
   ) => {
     const documents = await $fetch("/api/documents/find", {
       method: "POST",
@@ -175,6 +180,8 @@ export const useDb = () => {
         database,
         collection,
         filter,
+        options,
+        many,
       },
     });
 
