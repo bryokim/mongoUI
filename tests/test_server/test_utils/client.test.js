@@ -1305,4 +1305,116 @@ describe("client", () => {
       ).rejects.toThrowError();
     });
   });
+
+  describe("countDocuments", () => {
+    const mockDatabase = {
+      name: "__test_database__",
+      collections: ["__test_collection__"],
+    };
+
+    afterEach(async () => {
+      await clientInstance.clearCurrentClient();
+      vi.restoreAllMocks();
+    });
+
+    it("returns 0 if client is undefined", async () => {
+      expect(clientInstance.client).toBeUndefined;
+
+      const count = await clientInstance.countDocuments(
+        mockDatabase.name,
+        mockDatabase.collections[0]
+      );
+      expect(count).toEqual(0);
+    });
+
+    it("returns number of documents if client is defined", async () => {
+      await clientInstance.setClient(connectionOptions);
+      expect(clientInstance.client).toBeInstanceOf(MongoClient);
+
+      const spy = vi
+        .spyOn(clientInstance.client, "db")
+        .mockImplementation(() => ({
+          collection(col) {
+            return {
+              countDocuments(filter, options) {
+                return {
+                  col,
+                  filter,
+                  options,
+                };
+              },
+            };
+          },
+        }));
+
+      const count = await clientInstance.countDocuments(
+        mockDatabase.name,
+        mockDatabase.collections[0]
+      );
+      expect(count).toEqual({
+        col: mockDatabase.collections[0],
+        filter: {},
+        options: {},
+      });
+      expect(spy).toHaveBeenCalledWith(mockDatabase.name);
+    });
+
+    it("database not a string or not provided throws an error", () => {
+      expect(
+        async () => await clientInstance.countDocuments()
+      ).rejects.toThrowError("database must be a string");
+
+      expect(
+        async () => await clientInstance.countDocuments(1)
+      ).rejects.toThrowError("database must be a string");
+
+      expect(
+        async () => await clientInstance.countDocuments([1])
+      ).rejects.toThrowError("database must be a string");
+    });
+
+    it("collection not a string or not provided throws an error", () => {
+      expect(
+        async () => await clientInstance.countDocuments(mockDatabase.name)
+      ).rejects.toThrowError("collection must be a string");
+
+      expect(
+        async () => await clientInstance.countDocuments(mockDatabase.name, 1)
+      ).rejects.toThrowError("collection must be a string");
+
+      expect(
+        async () => await clientInstance.countDocuments(mockDatabase.name, [1])
+      ).rejects.toThrowError("collection must be a string");
+    });
+
+    it("filter not a valid Javascript object", async () => {
+      await clientInstance.setClient(connectionOptions);
+      expect(clientInstance.client).toBeInstanceOf(MongoClient);
+
+      vi.spyOn(console, "log").mockImplementation(() => {});
+      expect(
+        clientInstance.countDocuments(
+          mockDatabase.name,
+          mockDatabase.collections[0],
+          ["invalid_filter"]
+        )
+      ).rejects.toThrowError();
+
+      expect(
+        clientInstance.countDocuments(
+          mockDatabase.name,
+          mockDatabase.collections[0],
+          "invalid_filter"
+        )
+      ).rejects.toThrowError();
+
+      expect(
+        clientInstance.countDocuments(
+          mockDatabase.name,
+          mockDatabase.collections[0],
+          1
+        )
+      ).rejects.toThrowError();
+    });
+  });
 });
