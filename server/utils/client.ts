@@ -639,6 +639,38 @@ class Client {
       }
     }
   }
+
+  /**
+   * Finds the number of documents in a collection.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter filter for the count.
+   * @param options optional settings for the count command.
+   * @returns number of documents in the collection.
+   *
+   * @throws If arguments are not of the expected type.
+   */
+  async countDocuments(
+    database: string,
+    collection: string,
+    filter = {},
+    options = {}
+  ) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
+    if (this.#client) {
+      return await this.#client
+        .db(database)
+        .collection(collection)
+        .countDocuments(filter, options);
+    }
+    return 0;
+  }
 }
 
 let clientInstance = new Client();
