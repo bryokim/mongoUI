@@ -285,6 +285,34 @@ export const useDb = () => {
     return result;
   };
 
+  /**
+   * Finds the number of documents in a collection.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter filter for the count.
+   * @param options optional settings passed to the command.
+   * @returns number of documents in the collection.
+   */
+  const countDocuments = async (
+    database: string,
+    collection: string,
+    filter = {},
+    options = {}
+  ) => {
+    const count = await $fetch("/api/documents/count", {
+      method: "POST",
+      body: {
+        database,
+        collection,
+        filter,
+        options,
+      },
+    });
+
+    return count;
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
@@ -300,5 +328,6 @@ export const useDb = () => {
     getSchema,
     updateDocument,
     deleteDocument,
+    countDocuments,
   };
 };
