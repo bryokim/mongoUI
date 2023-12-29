@@ -116,15 +116,16 @@ export const useDb = () => {
    * @param database name of the database.
    * @param collection name of the collection.
    * @param side the side of the infinity scroll being loaded.
-   * @param inserted set `true` when loading after inserting document.
-   *
+   * @param filter search criteria.
+   * @param options optional settings passed to the command.
    * @returns array of documents in the next current page.
    */
   const findDocumentsInPage = async (
     database: string,
     collection: string,
     side: string,
-    inserted: boolean = false
+    filter = {},
+    options = {}
   ) => {
     let nextPage = 0;
 
@@ -134,15 +135,14 @@ export const useDb = () => {
       setPage(0, database, collection);
     }
 
-    // Previous page might not have been full.
-    nextPage = inserted && nextPage !== 0 ? nextPage - 1 : nextPage;
-
     const documents = await $fetch("/api/collection/documents", {
-      method: "GET",
-      query: {
+      method: "POST",
+      body: {
         database,
         collection,
         page: nextPage,
+        filter,
+        options,
       },
     });
 

@@ -420,6 +420,8 @@ class Client {
    * @param database name of the database.
    * @param collection name of the collection.
    * @param page page to load.
+   * @param filter query passed to the find method.
+   * @param options optional settings passed to the find method.
    * @returns array of documents in the given page.
    *
    * @throws If arguments are not of the expected type.
@@ -427,7 +429,9 @@ class Client {
   async findDocumentsInPage(
     database: string,
     collection: string,
-    page: number
+    page: number,
+    filter = {},
+    options = {}
   ) {
     try {
       this.validateArgs({ database, collection, page });
@@ -440,7 +444,7 @@ class Client {
       const documents = await this.#client
         .db(database)
         .collection(collection)
-        .find({})
+        .find(filter, options)
         .skip(page * pageSize)
         .limit(pageSize)
         .toArray();
