@@ -22,30 +22,112 @@
       <v-row>
         <v-col cols="3"></v-col>
         <v-col cols="6">
-          <v-sheet>
-            <p class="mb-5">Enter the filter below</p>
+          <v-sheet class="mt-5">
+            <v-tabs v-model="tab" fixed-tabs color="#FF9D87" class="mb-16">
+              <v-tab :value="1" class="text-lowercase"> JSON </v-tab>
+              <v-tab :value="2" class="text-lowercase"> key-value pairs </v-tab>
+            </v-tabs>
 
-            <div class="mb-10">
-              <ClientOnly>
-                <CodeEditor
-                  class="mb-1"
-                  v-model="filter"
-                  :languages="[['json', 'JSON']]"
-                  :line-nums="true"
-                  theme="vs2015"
-                  width="100%"
-                >
-                </CodeEditor>
-              </ClientOnly>
-              <div v-if="filterError" class="text-center">
-                <v-chip
-                  variant="flat"
-                  color="danger"
-                  prepend-icon="mdi-alert-circle"
-                  >{{ filterError }}</v-chip
-                >
-              </div>
-            </div>
+            <v-window v-model="tab">
+              <v-window-item :value="1">
+                <p class="mb-5">Enter the filter below</p>
+
+                <div class="mb-10">
+                  <ClientOnly>
+                    <CodeEditor
+                      class="mb-1"
+                      v-model="filter"
+                      :languages="[['json', 'JSON']]"
+                      :line-nums="true"
+                      theme="vs2015"
+                      width="100%"
+                    >
+                    </CodeEditor>
+                  </ClientOnly>
+                  <div v-if="filterError" class="text-center">
+                    <v-chip
+                      variant="flat"
+                      color="danger"
+                      prepend-icon="mdi-alert-circle"
+                      >{{ filterError }}</v-chip
+                    >
+                  </div>
+                </div>
+              </v-window-item>
+
+              <v-window-item :value="2">
+                <div class="mb-10">
+                  <v-row>
+                    <v-col cols="1"></v-col>
+                    <v-col cols="5" class="text-center border-b mb-9"
+                      >Key</v-col
+                    >
+                    <v-col cols="5" class="text-center border-b mb-9"
+                      >Value</v-col
+                    >
+                    <v-col cols="1"></v-col>
+                    <v-hover
+                      v-slot="{ isHovering, props }"
+                      v-for="(item, i) in keyValueFilters"
+                      :key="i"
+                    >
+                      <v-col cols="1" v-bind="props" class="py-0">
+                        <v-checkbox
+                          :model-value="
+                            item.key
+                              ? (item.checked = item.manual
+                                  ? item.checked
+                                  : true)
+                              : (item.checked = false)
+                          "
+                          density="compact"
+                          variant="underlined"
+                          @update:model-value="
+                            (item.checked = item.manual
+                              ? !item.checked
+                              : false) ||
+                              (item.manual = item.key ? true : false)
+                          "
+                        ></v-checkbox>
+                      </v-col>
+                      <v-col cols="5" v-bind="props" class="py-0">
+                        <v-text-field
+                          v-model="item.key"
+                          density="compact"
+                          variant="underlined"
+                          clearable
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="5" v-bind="props" class="py-0">
+                        <v-text-field
+                          v-model="item.value"
+                          density="compact"
+                          variant="underlined"
+                          clearable
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="1" v-bind="props">
+                        <v-icon
+                          class="py-0 mdi-24px"
+                          :color="isHovering ? 'white' : 'transparent'"
+                          @click="removeItem(i)"
+                          >mdi-close</v-icon
+                        >
+                      </v-col>
+                    </v-hover>
+                    <v-col cols="10"></v-col>
+                    <v-col cols="2">
+                      <VBtnBlock
+                        color="primary"
+                        prepend-icon="mdi-plus"
+                        @click="addItem"
+                        >Add</VBtnBlock
+                      >
+                    </v-col>
+                  </v-row>
+                </div>
+              </v-window-item>
+            </v-window>
 
             <VBtnBlock color="success" @click="find"
               >Find Document(s)</VBtnBlock
@@ -69,11 +151,17 @@
                   prepend-icon="mdi-file-document-multiple"
                   class=""
                 >
-                  Count: {{ resultCount }}</v-chip
+                  Count:
+                  {{ resultCount }}</v-chip
                 >
               </v-col>
             </v-row>
-            <v-infinite-scroll v-if="result.length > 0" :height="400" :items="result" :onLoad="load">
+            <v-infinite-scroll
+              v-if="result.length > 0"
+              :height="400"
+              :items="result"
+              :onLoad="load"
+            >
               <v-container>
                 <JsonViewer
                   theme="my-theme"
@@ -107,18 +195,30 @@ export default {
   },
   data() {
     return {
+      tab: null,
       dialog: false,
+      enabled: true,
       filter: "",
       result: [],
       resultCount: 0,
-      noDocumentsFound:false, 
+      noDocumentsFound: false,
       timeout: 4000,
       filterError: "",
+      keyValueFilters: [{ key: "", value: "", checked: true, manual: false }],
     };
   },
   methods: {
     async find() {
-      if (!this.validate()) return;
+      const { parseFilterFromJSON, parseFilterToJSON } = useParse();
+      let parsedFilter;
+
+      if (this.tab === 1) {
+        if (!this.validate()) return;
+        parsedFilter = JSON.parse(this.filter);
+        this.keyValueFilters = parseFilterFromJSON(parsedFilter);
+      } else {
+        parsedFilter = parseFilterToJSON(this.keyValueFilters);
+      }
 
       this.result = [];
       this.noDocumentsFound = false;
@@ -131,27 +231,35 @@ export default {
         this.database,
         this.collection,
         "end",
-        JSON.parse(this.filter)
+        parsedFilter
       );
 
       if (this.result.length > 0) {
         this.resultCount = await countDocuments(
           this.database,
           this.collection,
-          JSON.parse(this.filter)
+          parsedFilter
         );
       } else {
         this.noDocumentsFound = true;
       }
+
+      this.filter = JSON.stringify(parsedFilter, null, 2);
     },
     async load({ done }) {
       const { findDocumentsInPage } = useDb();
+      const { parseFilterToJSON } = useParse();
+
+      const parsedFilter =
+        this.tab === 1
+          ? JSON.parse(this.filter)
+          : parseFilterToJSON(this.keyValueFilters);
 
       const documents = await findDocumentsInPage(
         this.database,
         this.collection,
         "end",
-        JSON.parse(this.filter)
+        parsedFilter
       );
 
       if (documents.length > 0) {
@@ -173,6 +281,18 @@ export default {
       }
 
       return true;
+    },
+    addItem() {
+      this.keyValueFilters.push({ key: "", value: "", checked: true, manual: false });
+    },
+    removeItem(index) {
+      if (!(index === 0 && this.keyValueFilters.length === 1)) {
+        this.keyValueFilters = this.keyValueFilters
+          .slice(0, index)
+          .concat(this.keyValueFilters.slice(index + 1));
+      } else {
+        this.keyValueFilters = [{ key: "", value: "", checked: true, manual: false }];
+      }
     },
     close() {
       this.dialog = false;
