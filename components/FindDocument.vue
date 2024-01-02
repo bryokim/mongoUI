@@ -59,8 +59,11 @@
                 <div class="mb-10">
                   <v-row>
                     <v-col cols="1"></v-col>
-                    <v-col cols="5" class="text-center border-b mb-9"
+                    <v-col cols="4" class="text-center border-b mb-9"
                       >Key</v-col
+                    >
+                    <v-col cols="1" class="text-center mb-9"
+                      ></v-col
                     >
                     <v-col cols="5" class="text-center border-b mb-9"
                       >Value</v-col
@@ -90,12 +93,21 @@
                           "
                         ></v-checkbox>
                       </v-col>
-                      <v-col cols="5" v-bind="props" class="py-0">
+                      <v-col cols="4" v-bind="props" class="py-0">
                         <v-text-field
                           v-model="item.key"
                           density="compact"
                           variant="underlined"
                           clearable
+                        ></v-text-field>
+                      </v-col>
+                      <v-col cols="1" v-bind="props" class="py-0">
+                        <v-text-field
+                          v-model="item.operator"
+                          density="compact"
+                          variant="solo"
+                          class="pa-0 ma-0 custom-solo"
+                          hide-details
                         ></v-text-field>
                       </v-col>
                       <v-col cols="5" v-bind="props" class="py-0">
@@ -204,7 +216,9 @@ export default {
       noDocumentsFound: false,
       timeout: 4000,
       filterError: "",
-      keyValueFilters: [{ key: "", value: "", checked: true, manual: false }],
+      keyValueFilters: [
+        { key: "", value: "", operator: "=", checked: true, manual: false },
+      ],
     };
   },
   methods: {
@@ -283,7 +297,13 @@ export default {
       return true;
     },
     addItem() {
-      this.keyValueFilters.push({ key: "", value: "", checked: true, manual: false });
+      this.keyValueFilters.push({
+        key: "",
+        value: "",
+        operator: "=",
+        checked: true,
+        manual: false,
+      });
     },
     removeItem(index) {
       if (!(index === 0 && this.keyValueFilters.length === 1)) {
@@ -291,7 +311,9 @@ export default {
           .slice(0, index)
           .concat(this.keyValueFilters.slice(index + 1));
       } else {
-        this.keyValueFilters = [{ key: "", value: "", checked: true, manual: false }];
+        this.keyValueFilters = [
+          { key: "", value: "", operator: "=", checked: true, manual: false },
+        ];
       }
     },
     close() {
@@ -303,3 +325,10 @@ export default {
   },
 };
 </script>
+
+<style>
+.custom-solo .v-input__control .v-field .v-field__field .v-field__input{
+  padding: 3px;
+  text-align: center;
+}
+</style>
