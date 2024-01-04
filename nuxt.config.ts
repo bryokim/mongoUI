@@ -14,6 +14,8 @@ export default defineNuxtConfig({
       });
     },
     "@nuxt/test-utils/module",
+    "@nuxt/content",
+    "@nuxtjs/color-mode",
   ],
   vite: {
     vue: {
@@ -38,4 +40,22 @@ export default defineNuxtConfig({
       },
     },
   },
+  extends: "@nuxt-themes/typography",
+  content: {
+    highlight: {
+      theme: {
+        default: "material-theme",
+        // Default theme (same as single string)
+        light: "light-plus",
+        // Theme used if `html.dark`
+        dark: "github-dark",
+        // Theme used if `html.sepia`
+        sepia: "monokai",
+      },
+    },
+    documentDriven: true,
+  },
+  colorMode: {
+    classSuffix: ''
+  }
 });
