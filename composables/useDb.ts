@@ -116,15 +116,16 @@ export const useDb = () => {
    * @param database name of the database.
    * @param collection name of the collection.
    * @param side the side of the infinity scroll being loaded.
-   * @param inserted set `true` when loading after inserting document.
-   *
+   * @param filter search criteria.
+   * @param options optional settings passed to the command.
    * @returns array of documents in the next current page.
    */
   const findDocumentsInPage = async (
     database: string,
     collection: string,
     side: string,
-    inserted: boolean = false
+    filter = {},
+    options = {}
   ) => {
     let nextPage = 0;
 
@@ -134,15 +135,14 @@ export const useDb = () => {
       setPage(0, database, collection);
     }
 
-    // Previous page might not have been full.
-    nextPage = inserted && nextPage !== 0 ? nextPage - 1 : nextPage;
-
     const documents = await $fetch("/api/collection/documents", {
-      method: "GET",
-      query: {
+      method: "POST",
+      body: {
         database,
         collection,
         page: nextPage,
+        filter,
+        options,
       },
     });
 
@@ -158,16 +158,21 @@ export const useDb = () => {
 
   /**
    * Finds documents that match filter in the given collection.
+   * If `many` is set to `false`, filter is not considered when
    * @async
    * @param database name of the database.
    * @param collection name of the collection.
+   * @param many Whether to find multiple documents. Set to `false` to `findOne`.
    * @param filter search criteria.
+   * @param options optional settings passed to the command.
    * @returns documents that match the filter.
    */
   const findDocuments = async (
     database: string,
     collection: string,
-    filter: { [propName: string]: string }
+    many = true,
+    filter = {},
+    options = {}
   ) => {
     const documents = await $fetch("/api/documents/find", {
       method: "POST",
@@ -175,6 +180,8 @@ export const useDb = () => {
         database,
         collection,
         filter,
+        options,
+        many,
       },
     });
 
@@ -285,6 +292,34 @@ export const useDb = () => {
     return result;
   };
 
+  /**
+   * Finds the number of documents in a collection.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter filter for the count.
+   * @param options optional settings passed to the command.
+   * @returns number of documents in the collection.
+   */
+  const countDocuments = async (
+    database: string,
+    collection: string,
+    filter = {},
+    options = {}
+  ) => {
+    const count = await $fetch("/api/documents/count", {
+      method: "POST",
+      body: {
+        database,
+        collection,
+        filter,
+        options,
+      },
+    });
+
+    return count;
+  };
+
   return {
     setDbsInfo,
     setRolesInfo,
@@ -300,5 +335,6 @@ export const useDb = () => {
     getSchema,
     updateDocument,
     deleteDocument,
+    countDocuments,
   };
 };

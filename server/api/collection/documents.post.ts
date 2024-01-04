@@ -5,16 +5,20 @@ import clientInstance from "~/server/utils/client";
  */
 
 export default defineEventHandler(async (event) => {
-  const { database, collection, page } = getQuery<{
+  const { database, collection, page, filter, options } = await readBody<{
     database: string;
     collection: string;
     page: number;
+    filter: {};
+    options: {};
   }>(event);
 
   const docs = await clientInstance.findDocumentsInPage(
     database,
     collection,
-    page
+    page,
+    filter,
+    options
   );
 
   return docs;

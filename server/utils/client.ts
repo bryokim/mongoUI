@@ -420,6 +420,8 @@ class Client {
    * @param database name of the database.
    * @param collection name of the collection.
    * @param page page to load.
+   * @param filter query passed to the find method.
+   * @param options optional settings passed to the find method.
    * @returns array of documents in the given page.
    *
    * @throws If arguments are not of the expected type.
@@ -427,7 +429,9 @@ class Client {
   async findDocumentsInPage(
     database: string,
     collection: string,
-    page: number
+    page: number,
+    filter = {},
+    options = {}
   ) {
     try {
       this.validateArgs({ database, collection, page });
@@ -440,7 +444,7 @@ class Client {
       const documents = await this.#client
         .db(database)
         .collection(collection)
-        .find({})
+        .find(filter, options)
         .skip(page * pageSize)
         .limit(pageSize)
         .toArray();
@@ -458,6 +462,7 @@ class Client {
    * @param database name of the database.
    * @param collection name of the collection.
    * @param filter search criteria.
+   * @param options optional settings passed to the command.
    * @returns documents that match the filter.
    *
    * @throws If arguments are not of the expected type.
@@ -465,7 +470,8 @@ class Client {
   async findDocuments(
     database: string,
     collection: string,
-    filter: { [propName: string]: any }
+    filter: { [propName: string]: any },
+    options = {}
   ) {
     try {
       this.validateArgs({ database, collection });
@@ -477,7 +483,7 @@ class Client {
       return await this.#client
         .db(database)
         .collection(collection)
-        .find(filter)
+        .find(filter, options)
         .toArray();
     }
     return [];
@@ -534,11 +540,18 @@ class Client {
    * @async
    * @param database name of the database.
    * @param collection name of the collection.
+   * @param filter query to find operation.
+   * @param options optional settings for the command.
    * @returns a document.
    *
    * @throws If arguments are not of the expected type.
    */
-  async findOne(database: string, collection: string) {
+  async findOne(
+    database: string,
+    collection: string,
+    filter = {},
+    options = {}
+  ) {
     try {
       this.validateArgs({ database, collection });
     } catch (error: any) {
@@ -549,7 +562,7 @@ class Client {
       const document = await this.#client
         .db(database)
         .collection(collection)
-        .findOne();
+        .findOne(filter, options);
 
       return document;
     }
@@ -638,6 +651,38 @@ class Client {
         throw new Error(error.message);
       }
     }
+  }
+
+  /**
+   * Finds the number of documents in a collection.
+   *
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @param filter filter for the count.
+   * @param options optional settings for the count command.
+   * @returns number of documents in the collection.
+   *
+   * @throws If arguments are not of the expected type.
+   */
+  async countDocuments(
+    database: string,
+    collection: string,
+    filter = {},
+    options = {}
+  ) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
+    if (this.#client) {
+      return await this.#client
+        .db(database)
+        .collection(collection)
+        .countDocuments(filter, options);
+    }
+    return 0;
   }
 }
 

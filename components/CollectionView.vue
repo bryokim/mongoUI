@@ -1,177 +1,111 @@
 <template>
   <v-row class="pa-0">
-    <v-col cols="9" class="pa-0">
-      <v-card v-if="noDocuments" color="warning" rounded="lg" class="py-0 mb-2"
+    <v-col cols="12" v-if="noDocuments">
+      <v-card color="warning" rounded="lg" class="py-0 mb-2"
         ><v-card-text class="pa-1 ms-4">
           <v-icon color="black">mdi-alert-circle</v-icon>
           {{ collection }} is empty. If you added documents and don't see them,
           reload page
         </v-card-text>
       </v-card>
-
-      <v-container v-else class="pt-0">
-        <v-form
-          ref="form"
-          v-model="validFilter"
-          validate-on="input"
-          @submit.prevent="find"
-        >
-          <v-row>
-            <v-col cols="10">
-              <v-text-field
-                v-if="foundItems.length === 0"
-                v-model="filter"
-                label="Find"
-                placeholder='{ "name" : "one", "_id" : 456778 }'
-                :rules="[rules.filterIsValid]"
-                variant="outlined"
-                density="compact"
-                class="ma-0 pa-0"
-                clearable
-                @click:clear="clearFoundItems"
-                @click:append="find"
-              >
-              </v-text-field>
-              <v-text-field
-                v-else
-                class="ma-0 pa-0"
-                density="compact"
-                variant="solo"
-                readonly
-                >Showing results for {{ filter }}</v-text-field
-              >
-            </v-col>
-            <v-col>
-              <VBtnBlock
-                v-if="foundItems.length === 0"
-                type="submit"
-                color="success"
-                text="search"
-                prepend-icon="mdi-magnify"
-              ></VBtnBlock>
-              <VBtnBlock
-                v-else
-                @click="clearFoundItems"
-                color="warning"
-                text="cancel"
-                prepend-icon="mdi-close"
-              ></VBtnBlock>
-            </v-col>
-          </v-row>
-        </v-form>
-
-        <v-card height="70vh" color="#1B1E2C" rounded="lg">
-          <v-infinite-scroll
-            height="70vh"
-            :items="items"
-            mode="manual"
-            @load="load"
-          >
-            <v-container>
-              <JsonViewer
-                v-if="foundItems.length > 0"
-                v-for="(foundItem, i) in foundItems"
-                :value="foundItem"
-                :key="i"
-                theme="my-theme"
-                copyable
-              >
-              </JsonViewer>
-              <JsonViewer
-                v-else
-                v-for="(item, j) in items"
-                :value="item"
-                :key="j"
-                theme="my-theme"
-                copyable
-              ></JsonViewer>
-            </v-container>
-
-            <template v-slot:error="{ props }">
-              <v-alert type="error">
-                <div class="d-flex justify-space-between align-center">
-                  Something went wrong...
-                  <v-btn
-                    color="white"
-                    variant="outlined"
-                    size="small"
-                    v-bind="props"
-                  >
-                    Retry
-                  </v-btn>
-                </div>
-              </v-alert>
-            </template>
-            <template v-slot:empty>
-              <v-alert
-                v-if="!noDocuments && foundItems.length === 0"
-                type="warning"
-                >No more documents!</v-alert
-              >
-            </template>
-            <template v-slot:load-more="{ props }">
-              <v-btn
-                v-if="foundItems.length === 0"
-                icon="mdi-refresh"
-                variant="text"
-                v-bind="props"
-              ></v-btn>
-            </template>
-          </v-infinite-scroll>
-        </v-card>
-      </v-container>
     </v-col>
 
-    <v-col>
-      <div class="mb-10">
-        <InsertDocument
-          v-if="canWriteDocument"
-          :database="database"
-          :collection="collection"
-          @inserted="load({ side: 'end', done: console.log, inserted: true })"
-        ></InsertDocument>
-      </div>
-      <div class="mb-10">
-        <UpdateDocument
-          v-if="canWriteDocument"
-          :database="database"
-          :collection="collection"
-          @updated="reload"
-        ></UpdateDocument>
-      </div>
+    <v-col cols="6" class="pa-0">
+      <v-card width="80%" class="mx-auto" :elevation="10" rounded="lg">
+        <v-card-subtitle> Document Actions </v-card-subtitle>
+        <v-card-text>
+          <div class="mb-10">
+            <InsertDocument
+              v-if="canWriteDocument"
+              :database="database"
+              :collection="collection"
+            ></InsertDocument>
+          </div>
+          <div class="mb-10">
+            <FindDocument
+              :database="database"
+              :collection="collection"
+            ></FindDocument>
+          </div>
+          <div class="mb-10">
+            <UpdateDocument
+              v-if="canWriteDocument"
+              :database="database"
+              :collection="collection"
+            ></UpdateDocument>
+          </div>
 
-      <DeleteDocument
-        v-if="canWriteDocument"
-        :database="database"
-        :collection="collection"
-        @deleted="reload"
-      ></DeleteDocument>
+          <DeleteDocument
+            v-if="canWriteDocument"
+            :database="database"
+            :collection="collection"
+          ></DeleteDocument>
+        </v-card-text>
+      </v-card>
+
+      <v-sheet class="mt-5 mx-auto" max-width="80%" :elevation="4" rounded="lg">
+        <v-list lines="two" rounded="lg">
+          <v-list-item inset class="text-h6 pt-0">
+            <template v-slot:prepend>
+              <v-icon color="white">mdi-information-variant</v-icon>
+            </template>
+            Collection Stats
+          </v-list-item>
+
+          <v-divider color="success" thickness="2px"></v-divider>
+
+          <v-list-item title="document count" :subtitle="documentCount">
+            <template v-slot:prepend>
+              <v-icon color="white">mdi-file-document-multiple</v-icon>
+            </template>
+          </v-list-item>
+
+          <!-- <v-list-item title="size" subtitle="200 Mb">
+            <template v-slot:prepend>
+              <v-icon color="white">mdi-file-document-multiple</v-icon>
+            </template>
+          </v-list-item> -->
+        </v-list>
+      </v-sheet>
+    </v-col>
+
+    <v-col cols="6" class="pa-0">
+      <v-sheet
+        class="pa-2"
+      >
+        <p class="mb-4 text-subtitle-2">Example document in the collection</p>
+        <ClientOnly>
+          <CodeEditor
+            v-model="documentString"
+            :languages="[['json', 'JSON']]"
+            theme="vs2015"
+            width="100%"
+            height="500px"
+            :read-only="true"
+            :wrap="true"
+            ></CodeEditor
+          >
+        </ClientOnly>
+      </v-sheet>
     </v-col>
   </v-row>
 </template>
 
 <script>
-import JsonViewer from "vue-json-viewer/ssr";
+import hljs from "highlight.js";
+import CodeEditor from "simple-code-editor/CodeEditor";
 
 export default {
   components: {
-    JsonViewer,
+    CodeEditor,
   },
   props: ["collection", "database"],
   data() {
     return {
-      scrollInvoked: 0,
-      items: [],
       noDocuments: false,
-      filter: "{}",
-      validFilter: false,
-      rules: {
-        filterIsValid: (value) => {
-          return useValidate().validateFilter(value);
-        },
-      },
-      foundItems: [],
-      previousDocuments: 0,
+      documentCount: 0,
+      document: {},
+      documentString: "{}",
     };
   },
   computed: {
@@ -183,70 +117,30 @@ export default {
     },
   },
   methods: {
-    async load({ side, done, inserted = false }) {
-      // Don't load any documents if finding documents.
-      if (this.foundItems.length > 0) {
-        done("ok");
-      } else {
-        const { findDocumentsInPage } = useDb();
+    async getDocumentCount() {
+      const { countDocuments } = useDb();
 
-        const documents = await findDocumentsInPage(
-          this.database,
-          this.collection,
-          side,
-          inserted
-        );
-
-        if (documents.length === 0) {
-          this.noDocuments = this.items.length === 0 ? true : false;
-          done("empty");
-        } else {
-          // remove last items that will be reloaded.
-          if (inserted) {
-            this.items = this.items.slice(
-              0,
-              this.items.length - this.previousDocuments
-            );
-          }
-          this.items.push(...documents);
-          done("ok");
-          this.previousDocuments = documents.length;
-        }
-      }
+      this.documentCount = await countDocuments(this.database, this.collection);
     },
-    async find() {
-      if (this.$refs.form.validate()) {
-        const { findDocuments } = useDb();
 
-        const documents = await findDocuments(
-          this.database,
-          this.collection,
-          JSON.parse(this.filter)
-        );
+    async findSingleDocument() {
+      const { findDocuments } = useDb();
 
-        this.foundItems =
-          documents.length > 0 ? documents : ["No documents matched"];
-      }
-    },
-    clearFoundItems() {
-      this.foundItems = [];
-    },
-    async reload() {
-      // start loading documents afresh.
-      this.items = [];
-      usePage().value[this.database][this.collection] = 0;
-      await this.load({ side: "end", done: console.log });
+      this.document = await findDocuments(
+        this.database,
+        this.collection,
+        false
+      );
     },
   },
   async mounted() {
-    const { setPage } = useDb();
+    await this.getDocumentCount();
+    this.noDocuments = this.documentCount === 0 ? true : false;
 
-    // Restore to the first page.
-    setPage(0, this.database, this.collection);
-
-    await this.load({ side: "end", done: console.log });
-
-    this.noDocuments = this.items.length === 0 ? true : false;
+    await this.findSingleDocument();
+    this.documentString = this.document
+      ? JSON.stringify(this.document, null, 2)
+      : "no document found";
   },
 };
 </script>
