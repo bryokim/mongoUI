@@ -415,6 +415,49 @@ class Client {
   }
 
   /**
+   * Drops a collection from a database.
+   * @async
+   * @param database name of the database.
+   * @param collection name of the collection.
+   * @returns `true` if collection was successfully dropped, else `false`.
+   * 
+   * @throws If arguments are not of the expected type.
+   */
+  async dropCollection(database: string, collection: string) {
+    try {
+      this.validateArgs({ database, collection });
+    } catch (error: any) {
+      throw Error(error.message);
+    }
+
+    let index = -1;
+
+    if (this.#emptyDatabases) {
+      let i = 0;
+      for (const db of this.#emptyDatabases) {
+        if (db.name === database) {
+          index = i;
+          break;
+        }
+        i++;
+      }
+    }
+
+    if (index !== -1 && this.#emptyDatabases) {
+      this.#emptyDatabases[index].collections = this.#emptyDatabases[
+        index
+      ].collections.filter((col) => col !== collection);
+      return true;
+    } else {
+      try {
+        return await this.#client?.db(database).dropCollection(collection);
+      } catch (error) {
+        return false;
+      }
+    }
+  }
+
+  /**
    * Finds documents in the given page.
    *
    * @param database name of the database.

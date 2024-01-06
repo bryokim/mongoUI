@@ -111,6 +111,27 @@ export const useDb = () => {
   };
 
   /**
+   * Sends request to drop a collection.
+   *
+   * @async
+   * @param database name of the database.
+   * @param collection name of the collection
+   */
+  const dropCollection = async (database: string, collection: string) => {
+    const dropped = await $fetch("/api/collection/drop", {
+      method: "POST",
+      body: { database, collection },
+    });
+
+    if (dropped) {
+      // Reload `useDbsInfo` with the new collections.
+      await getDbsInfo();
+    } else {
+      throw Error("Error occurred while creating the collection");
+    }
+  };
+
+  /**
    * Finds documents in the next page to be added to the display.
    *
    * @param database name of the database.
@@ -329,6 +350,7 @@ export const useDb = () => {
     createDb,
     dropDb,
     createCollection,
+    dropCollection,
     findDocumentsInPage,
     findDocuments,
     insertDocument,

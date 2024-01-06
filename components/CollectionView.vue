@@ -70,9 +70,54 @@
     </v-col>
 
     <v-col cols="6" class="pa-0">
-      <v-sheet
-        class="pa-2"
-      >
+      <v-sheet class="pa-2">
+        <div v-if="canDropCollection">
+          <div>
+            <p
+              v-if="dropCollectionError"
+              class="mb-3 text-center text-danger rounded"
+            >
+              {{ dropCollectionError }}
+            </p>
+          </div>
+          <v-sheet width="400px" class="mx-auto" :elevation="10">
+            <v-dialog
+              v-model="dropCollectionDialog"
+              max-width="500px"
+              transition="dialog-top-transition"
+            >
+              <template v-slot:activator="{ props }">
+                <VBtnBlock
+                  v-bind="props"
+                  class="mb-10"
+                  color="#F5516E"
+                  width="100px"
+                  prepend-icon="mdi-delete-alert"
+                  >Drop Collection</VBtnBlock
+                >
+              </template>
+
+              <v-card rounded="lg" theme="dark">
+                <v-card-text>
+                  <v-icon size="large" color="danger" class="me-2">
+                    mdi-delete-alert
+                  </v-icon>
+                  Are you sure you want to drop {{ collection }}?
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn text="cancel" @click="closeDialog"></v-btn>
+                  <v-btn
+                    text="drop"
+                    color="danger"
+                    @click="dropCollection"
+                  ></v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+          </v-sheet>
+        </div>
+
         <p class="mb-4 text-subtitle-2">Example document in the collection</p>
         <ClientOnly>
           <CodeEditor
@@ -80,11 +125,10 @@
             :languages="[['json', 'JSON']]"
             theme="vs2015"
             width="100%"
-            height="500px"
+            height="400px"
             :read-only="true"
             :wrap="true"
-            ></CodeEditor
-          >
+          ></CodeEditor>
         </ClientOnly>
       </v-sheet>
     </v-col>
@@ -106,6 +150,8 @@ export default {
       documentCount: 0,
       document: {},
       documentString: "{}",
+      dropCollectionDialog: false,
+      dropCollectionError: "",
     };
   },
   computed: {
@@ -113,6 +159,12 @@ export default {
       return (
         useRolesInfo().value.superuser ||
         useRolesInfo().value.writeDocument?.includes(this.database)
+      );
+    },
+    canDropCollection() {
+      return (
+        useRolesInfo().value.superuser ||
+        useRolesInfo().value.collections?.includes(this.database)
       );
     },
   },
@@ -131,6 +183,23 @@ export default {
         this.collection,
         false
       );
+    },
+    async dropCollection() {
+      const { dropCollection } = useDb();
+
+      try {
+        await dropCollection(this.database, this.collection);
+
+        this.$router.push(`/home/${this.database}`);
+      } catch (error) {
+        console.log(error.data.message);
+        this.dropCollectionError = error.data.message;
+      }
+
+      this.closeDialog();
+    },
+    closeDialog() {
+      this.dropCollectionDialog = false;
     },
   },
   async mounted() {
