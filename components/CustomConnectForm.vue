@@ -52,8 +52,10 @@
             v-model="password"
             :rules="passwordRules"
             label="password"
-            type="password"
+            :type="show ? 'text' : 'password'"
             autocomplete="new-password"
+            :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+            @click:append-inner="show = !show"
           ></VTextFieldConnect>
         </v-container>
       </v-card>
@@ -79,6 +81,7 @@ import { useValidate } from "~/composables/useValidate";
 export default {
   data() {
     return {
+      show:false,
       valid: false,
       connectionLoading: false,
       error: "",

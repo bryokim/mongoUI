@@ -47,10 +47,11 @@
             v-model="password"
             label="password"
             :rules="[rules.isValid]"
-            :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
+            :append-inner-icon="show ? 'mdi-eye' : 'mdi-eye-off'"
             :type="show ? 'text' : 'password'"
             autocomplete="new-password"
-            @click:append="show = !show"
+            @click:append-inner="show = !show"
+            focused
           ></v-text-field>
 
           <v-card-actions>
@@ -108,6 +109,7 @@ export default {
     close() {
       this.password = "";
       this.dialog = false;
+      this.show = false;
     },
   },
 };
