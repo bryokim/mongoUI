@@ -24,9 +24,9 @@
                 <VBtnBlock color="primary-2">Load saved connection</VBtnBlock>
               </NuxtLink>
             </div>
-            <div class="mb-16">
+            <!-- <div class="mb-16">
               <VBtnBlock color="purple-2">Settings</VBtnBlock>
-            </div>
+            </div> -->
           </v-sheet>
         </v-sheet>
       </v-container>
