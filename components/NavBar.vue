@@ -2,18 +2,14 @@
   <v-toolbar id="navbar" :elevation="8">
     <NuxtLink to="/home">
       <v-toolbar-title class="ms-4">
-        <v-img src="~/assets/images/logo.svg" alt="mongoUI" :width="280">
-          <template v-slot:error>
-            <div class="title">mongoUI</div>
-          </template>
-        </v-img>
+        <img src="~/assets/images/logo.svg" alt="mongoUI" width="280" />
       </v-toolbar-title>
     </NuxtLink>
     <v-spacer></v-spacer>
 
     <div class="me-4">
-      <div v-if="!useClientInfo().value">MongoDB version X.X.X</div>
-      <div v-else>
+      <!-- <div v-if="!useClientInfo().value">MongoDB version X.X.X</div> -->
+      <div v-if="useClientInfo().value">
         <VBtnBlock color="danger" @click="disconnect"
           >Close connection</VBtnBlock
         >
