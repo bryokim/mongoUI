@@ -6,7 +6,13 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ props }">
-      <VBtnBlock color="primary" v-bind="props"> Insert document </VBtnBlock>
+      <VBtnBlock
+        color="primary"
+        v-bind="props"
+        prepend-icon="mdi-file-document-plus"
+      >
+        Insert document
+      </VBtnBlock>
     </template>
     <v-card>
       <v-toolbar dark color="surface" :elevation="10">

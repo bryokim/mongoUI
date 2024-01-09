@@ -6,7 +6,9 @@
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ props }">
-      <VBtnBlock color="primary" v-bind="props"> Update document </VBtnBlock>
+      <VBtnBlock color="purple-2" v-bind="props" prepend-icon="mdi-file-edit">
+        Update document
+      </VBtnBlock>
     </template>
     <v-card>
       <v-toolbar dark color="surface" :elevation="10">
